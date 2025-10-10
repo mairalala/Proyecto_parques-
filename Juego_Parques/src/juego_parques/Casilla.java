@@ -49,8 +49,7 @@ public class Casilla {
             return getColorJugador();
         } else if ("seguro".equals(tipo)) {
             return new Color(0, 200, 200);
-        } else if ("trampa".equals(tipo)) {
-            return new Color(255, 190, 190);
+        
 
         } else if ("pasillo".equals(tipo)) {
             return getColorJugador();

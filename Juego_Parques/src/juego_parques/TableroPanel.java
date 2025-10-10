@@ -78,13 +78,6 @@ public class TableroPanel extends JPanel {
             // Dibuja el número de la casilla
             g2d.drawString(String.valueOf(i + 1), x + 10, y + 25);
 
-            if ("salida".equals(c.getTipo())) {
-                g2d.drawString("SALIDA", x + 3, y + 20);
-            } else if ("seguro".equals(c.getTipo())) {
-                g2d.drawString("SEGURO", x + 3, y + 20);
-            } else if ("trampa".equals(c.getTipo())) {
-                g2d.drawString("TRAMPA", x + 3, y + 20);
-            }
         }
 
         // Pasillos con numeración
@@ -199,15 +192,59 @@ public class TableroPanel extends JPanel {
 
         // Dados
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(10, 15 * tamCasilla + 10, 40, 40);
-        g2d.fillRect(60, 15 * tamCasilla + 10, 40, 40);
+        g2d.fillRect(10, 16 * tamCasilla + 10, 40, 40);
+        g2d.fillRect(60, 16 * tamCasilla + 10, 40, 40);
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(10, 15 * tamCasilla + 10, 40, 40);
-        g2d.drawRect(60, 15 * tamCasilla + 10, 40, 40);
+        g2d.drawRect(10, 16 * tamCasilla + 10, 40, 40);
+        g2d.drawRect(60, 16 * tamCasilla + 10, 40, 40);
         g2d.setFont(new Font("Dialog", Font.BOLD, 18));
-        g2d.drawString(String.valueOf(dados[0]), 22, 15 * tamCasilla + 38);
-        g2d.drawString(String.valueOf(dados[1]), 72, 15 * tamCasilla + 38);
+        g2d.drawString(String.valueOf(dados[0]), 22, 16 * tamCasilla + 38);
+        g2d.drawString(String.valueOf(dados[1]), 72, 16 * tamCasilla + 38);
+
+        //COLORES
+        int y = (int) (17.5 * tamCasilla + 10);
+
+        g2d.setColor(new Color(255, 220, 80));
+        g2d.fillRect(10, y, 40, 40);
+
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(10, y, 40, 40);
+        g2d.setFont(new Font("Dialog", Font.BOLD, 11));
+        g2d.setFont(new Font("Dialog", Font.BOLD, 12));
+
+        int yBase = (int) (17.3 * tamCasilla + 38); // posición de la primera línea
+        int lineHeight = 16; // separación entre líneas 
+
+        g2d.drawString("salida ficha", 60, yBase);
+        g2d.drawString("amarilla", 60, yBase + lineHeight);
+
+        g2d.setColor(Color.RED); // 🔴 cambia el color a rojo
+        g2d.fillRect(160, y, 40, 40);
+
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(160, y, 40, 40);
+       g2d.drawString("salida ficha", 210, yBase);
+        g2d.drawString("roja", 210, yBase + lineHeight);
+
+        g2d.setColor(Color.BLUE); // 🔴 cambia el color a rojo
+        g2d.fillRect(320, y, 40, 40);
+
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(320, y, 40, 40);
+      g2d.drawString("salida ficha", 370, yBase);
+        g2d.drawString("azul", 370, yBase + lineHeight);
+
+        g2d.setColor(Color.GREEN); // 🔴 cambia el color a rojo
+        g2d.fillRect(480, y, 40, 40);
+
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(480, y, 40, 40);
+       g2d.drawString("salida ficha", 530, yBase);
+        g2d.drawString("verde", 530
+                , yBase + lineHeight);
+
     }
+    
 
     public void actualizar() {
         repaint();
