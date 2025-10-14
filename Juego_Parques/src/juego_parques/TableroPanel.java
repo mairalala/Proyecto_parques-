@@ -6,245 +6,240 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class TableroPanel extends JPanel {
 
     private Jugador[] jugadores;
     private Tablero tablero;
     private int tamCasilla = 40;
-    private int[] dados = {0, 0}; // La variable duplicada debe ser eliminada.
+    private int[] dados = {0, 0};
 
-    public TableroPanel(Jugador[] jugadores, Tablero tablero) {
-        this.jugadores = jugadores;
+    // Constructor: tablero y jugadores (jugadores puede ser null temporalmente)
+    public TableroPanel(Tablero tablero, Jugador[] jugadores) {
         this.tablero = tablero;
-        int dim = 15 * tamCasilla;
-        setPreferredSize(new Dimension(dim, dim + 80));
+        this.jugadores = jugadores;
+        int dim = 25 * tamCasilla;
+        setPreferredSize(new Dimension(dim, dim + 100));
     }
 
     public void setDados(int[] tirada) {
         this.dados = tirada;
     }
 
-    
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // Bases cuadradas (6x6)
+        // ---------------- BASES ----------------
         int bs = 7 * tamCasilla;
-        g2d.setColor(new Color(255, 80, 80)); // Rojo
-        g2d.fillRect(0, 0, bs, bs);
 
-        g2d.setColor(new Color(80, 80, 255)); // Azul
-        g2d.fillRect(9 * tamCasilla, 0, bs, bs);
-
-        g2d.setColor(new Color(80, 200, 80)); // Verde
-        g2d.fillRect(9 * tamCasilla, 9 * tamCasilla, bs, bs);
-
-        g2d.setColor(new Color(255, 220, 80)); // Amarillo
-        g2d.fillRect(0, 9 * tamCasilla, bs, bs);
-
-        // Meta Central (diamante)
+        // Base Rojo
         g2d.setColor(new Color(255, 80, 80));
-        g2d.fillPolygon(new int[]{6 * tamCasilla, 8 * tamCasilla, 7 * tamCasilla},
-                new int[]{6 * tamCasilla, 6 * tamCasilla, 7 * tamCasilla}, 3);
+        g2d.fillRect(1,tamCasilla+ 1, bs, bs);
 
+        // Base Azul
         g2d.setColor(new Color(80, 80, 255));
-        g2d.fillPolygon(new int[]{8 * tamCasilla, 8 * tamCasilla, 7 * tamCasilla},
-                new int[]{6 * tamCasilla, 8 * tamCasilla, 7 * tamCasilla}, 3);
+        g2d.fillRect(10 * tamCasilla, tamCasilla+1, bs, bs);
 
+        // Base Verde
         g2d.setColor(new Color(80, 200, 80));
-        g2d.fillPolygon(new int[]{8 * tamCasilla, 6 * tamCasilla, 7 * tamCasilla},
-                new int[]{8 * tamCasilla, 8 * tamCasilla, 7 * tamCasilla}, 3);
+        g2d.fillRect(10 * tamCasilla, 11 * tamCasilla, bs, bs);
 
+        // Base Amarillo
         g2d.setColor(new Color(255, 220, 80));
-        g2d.fillPolygon(new int[]{6 * tamCasilla, 6 * tamCasilla, 7 * tamCasilla},
-                new int[]{8 * tamCasilla, 6 * tamCasilla, 7 * tamCasilla}, 3);
+        g2d.fillRect(0, 11 * tamCasilla, bs, bs);
 
-        // Ruta principal
-        for (int i = 0; i < tablero.getRuta().size(); i++) {
-            Casilla c = tablero.getRuta().get(i);
-            Point p = c.getPosicion();
-            int x = p.x * tamCasilla;
-            int y = p.y * tamCasilla;
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(2));
+        g2d.drawRect(0, tamCasilla+1, bs, bs);
+        g2d.drawRect(10* tamCasilla, tamCasilla+1, bs, bs);
+        g2d.drawRect(10 * tamCasilla, 11 * tamCasilla, bs, bs);
+        g2d.drawRect(0, 11 * tamCasilla, bs, bs);
 
-            g2d.setColor(c.getDrawColor());
-            g2d.fillRect(x, y, tamCasilla, tamCasilla);
+        // ---------------- META (centro) ----------------
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(8 * tamCasilla, 8 * tamCasilla, 80, 120);
 
-            g2d.setColor(Color.BLACK);
-            g2d.drawRect(x, y, tamCasilla, tamCasilla);
-
-            // Dibuja el número de la casilla
-            g2d.drawString(String.valueOf(i + 1), x + 10, y + 25);
-
+        // Si tablero es null, no intentar dibujar ruta/pasillos/fichas
+        if (tablero == null) {
+            // dibujar leyenda de dados/colores y salir
+            dibujarDadosYLeyenda(g2d);
+            return;
         }
 
-        // Pasillos con numeración
-        for (Map.Entry<String, ArrayList<Casilla>> entry : tablero.getPasillos().entrySet()) {
-            String color = entry.getKey();
-            ArrayList<Casilla> pasillo = entry.getValue();
-            for (int i = 0; i < pasillo.size(); i++) {
-                Casilla c = pasillo.get(i);
+        // ---------------- RUTA ----------------
+        if (tablero.getRuta() != null) {
+            for (Casilla c : tablero.getCasillas()) {
+                if (c == null) continue;
                 Point p = c.getPosicion();
+                if (p == null) continue;
                 int x = p.x * tamCasilla;
                 int y = p.y * tamCasilla;
-
                 g2d.setColor(c.getDrawColor());
                 g2d.fillRect(x, y, tamCasilla, tamCasilla);
                 g2d.setColor(Color.BLACK);
                 g2d.drawRect(x, y, tamCasilla, tamCasilla);
-
-                // Dibuja el número de la casilla del pasillo
-                g2d.drawString(String.valueOf(i + 1), x + 10, y + 25);
             }
         }
 
-        // Dibujar las fichas
-        int fichaOffset = tamCasilla / 4;
-        int fichaSize = tamCasilla / 2;
-        Point[][] basePositions = {
-            {new Point(1, 1), new Point(4, 1), new Point(1, 4), new Point(4, 4)}, // Rojo
-            {new Point(10, 1), new Point(13, 1), new Point(10, 4), new Point(13, 4)}, // Azul
-            {new Point(10, 10), new Point(13, 10), new Point(10, 13), new Point(13, 13)}, // Verde
-            {new Point(1, 10), new Point(4, 10), new Point(1, 13), new Point(4, 13)} // Amarillo
-        };
-
-        Map<Point, List<Ficha>> fichasPorPosicion = new HashMap<>();
-
-        for (Jugador jugador : jugadores) {
-            for (Ficha ficha : jugador.getFichas()) {
-                if (ficha.estaEnBase()) {
-                    int jugadorIndex = 0;
-                    if (jugador.getColorStr().equals("Rojo")) {
-                        jugadorIndex = 0;
-                    } else if (jugador.getColorStr().equals("Azul")) {
-                        jugadorIndex = 1;
-                    } else if (jugador.getColorStr().equals("Verde")) {
-                        jugadorIndex = 2;
-                    } else if (jugador.getColorStr().equals("Amarillo")) {
-                        jugadorIndex = 3;
-                    }
-
-                    int fichaIndex = jugador.getFichas().indexOf(ficha);
-                    Point pos = basePositions[jugadorIndex][fichaIndex];
-                    int x = pos.x * tamCasilla + fichaOffset;
-                    int y = pos.y * tamCasilla + fichaOffset;
-                    g2d.setColor(jugador.getColor());
-                    g2d.fillOval(x, y, fichaSize, fichaSize);
+        // ---------------- PASILLOS ----------------
+        if (tablero.getPasillos() != null) {
+            for (Map.Entry<String, ArrayList<Casilla>> entry : tablero.getPasillos().entrySet()) {
+                ArrayList<Casilla> pasillo = entry.getValue();
+                if (pasillo == null) continue;
+                for (Casilla c : pasillo) {
+                    if (c == null) continue;
+                    Point p = c.getPosicion();
+                    if (p == null) continue;
+                    int x = p.x * tamCasilla;
+                    int y = p.y * tamCasilla;
+                    g2d.setColor(c.getDrawColor());
+                    g2d.fillRect(x, y, tamCasilla, tamCasilla);
                     g2d.setColor(Color.BLACK);
-                    g2d.drawOval(x, y, fichaSize, fichaSize);
-                } else if (ficha.haLlegadoAMeta()) {
-                    Point pos = tablero.getMeta();
-                    int x = pos.x * tamCasilla + fichaOffset;
-                    int y = pos.y * tamCasilla + fichaOffset;
-                    g2d.setColor(jugador.getColor());
-                    g2d.fillOval(x, y, fichaSize, fichaSize);
-                    g2d.setColor(Color.BLACK);
-                    g2d.drawOval(x, y, fichaSize, fichaSize);
-                } else {
-                    Point pos = ficha.getPosicion();
-                    fichasPorPosicion.computeIfAbsent(pos, k -> new ArrayList<>()).add(ficha);
+                    g2d.drawRect(x, y, tamCasilla, tamCasilla);
                 }
             }
         }
 
-        for (Map.Entry<Point, List<Ficha>> entry : fichasPorPosicion.entrySet()) {
+        // ---------------- FICHAS ----------------
+        int fichaOffset = tamCasilla / 4;
+        int fichaSize = tamCasilla / 2;
+
+        // Posiciones fijas dentro de las bases (asegúrate que coincidan con tu diseño)
+        Point[][] basePositions = {
+            // Rojo
+            {new Point(2, 3), new Point(4, 3), new Point(2, 5), new Point(4, 5)},
+            // Amarillo
+            {new Point(2, 13), new Point(4, 13), new Point(2, 15), new Point(4, 15)},
+            // Verde
+            {new Point(12, 13), new Point(14, 13), new Point(12, 15), new Point(14, 15)},
+            // Azul
+            {new Point(12, 3), new Point(14, 3), new Point(12, 5), new Point(14, 5)}
+        };
+
+        Map<Point, java.util.List<Ficha>> fichasPorPosicion = new HashMap<>();
+
+        // Si jugadores no está inicializado, no intentar dibujar fichas en base
+        if (jugadores != null) {
+            for (int j = 0; j < jugadores.length; j++) {
+                Jugador jugador = jugadores[j];
+                if (jugador == null) continue;
+                for (int f = 0; f < jugador.getFichas().size(); f++) {
+                    Ficha ficha = jugador.getFichas().get(f);
+                    if (ficha == null) continue;
+
+                    if (ficha.isEnBase()) {
+                        // Evitar OOB en basePositions si jugadores no coinciden con layout
+                        if (j < basePositions.length && f < basePositions[j].length) {
+                            Point pos = basePositions[j][f];
+                            int x = pos.x * tamCasilla + fichaOffset;
+                            int y = pos.y * tamCasilla + fichaOffset;
+                            g2d.setColor(ficha.getColor());
+                            g2d.fillOval(x, y, fichaSize, fichaSize);
+                            g2d.setColor(Color.BLACK);
+                            g2d.drawOval(x, y, fichaSize, fichaSize);
+                        }
+                    } else if (ficha.haLlegadoAMeta()) {
+                        Point pos = tablero.getMeta();
+                        if (pos != null) {
+                            int x = pos.x * tamCasilla + fichaOffset;
+                            int y = pos.y * tamCasilla + fichaOffset;
+                            g2d.setColor(ficha.getColor());
+                            g2d.fillOval(x, y, fichaSize, fichaSize);
+                            g2d.setColor(Color.BLACK);
+                            g2d.drawOval(x, y, fichaSize, fichaSize);
+                        }
+                    } else {
+                        // Ficha en ruta o pasillo: getPosicion() debe devolver Point
+                        Point pos = ficha.getPosicion();
+                        if (pos != null) {
+                            // clave basada en punto (mutable: aceptable aquí)
+                            fichasPorPosicion.computeIfAbsent(pos, k -> new ArrayList<>()).add(ficha);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Dibujar fichas en ruta/posiciones ocupadas
+        for (Map.Entry<Point, java.util.List<Ficha>> entry : fichasPorPosicion.entrySet()) {
             Point pos = entry.getKey();
-            List<Ficha> fichasEnCasilla = entry.getValue();
+            java.util.List<Ficha> fichasEnCasilla = entry.getValue();
+            if (pos == null) continue;
 
             int x = pos.x * tamCasilla;
             int y = pos.y * tamCasilla;
 
-            if (fichasEnCasilla.size() == 1) {
-                Ficha ficha = fichasEnCasilla.get(0);
+            int count = 0;
+            for (Ficha ficha : fichasEnCasilla) {
+                int offsetX = (count % 2 == 0) ? fichaOffset : tamCasilla - fichaOffset - fichaSize;
+                int offsetY = (count < 2) ? fichaOffset : tamCasilla - fichaOffset - fichaSize;
                 g2d.setColor(ficha.getColor());
-                g2d.fillOval(x + fichaOffset, y + fichaOffset, fichaSize, fichaSize);
+                g2d.fillOval(x + offsetX, y + offsetY, fichaSize, fichaSize);
                 g2d.setColor(Color.BLACK);
-                g2d.drawOval(x + fichaOffset, y + fichaOffset, fichaSize, fichaSize);
-            } else {
-                int count = 0;
-                for (Ficha ficha : fichasEnCasilla) {
-                    int offsetX = 0;
-                    int offsetY = 0;
-                    if (count == 0) {
-                        offsetX = fichaOffset;
-                        offsetY = fichaOffset;
-                    } else if (count == 1) {
-                        offsetX = fichaOffset;
-                        offsetY = tamCasilla - fichaOffset - fichaSize;
-                    } else if (count == 2) {
-                        offsetX = tamCasilla - fichaOffset - fichaSize;
-                        offsetY = fichaOffset;
-                    } else if (count == 3) {
-                        offsetX = tamCasilla - fichaOffset - fichaSize;
-                        offsetY = tamCasilla - fichaOffset - fichaSize;
-                    }
-
-                    // g2d.setColor(ficha.getColor());
-                    g2d.fillOval(x + offsetX, y + offsetY, fichaSize, fichaSize);
-                    g2d.setColor(Color.BLACK);
-                    g2d.drawOval(x + offsetX, y + offsetY, fichaSize, fichaSize);
-                    count++;
-                }
+                g2d.drawOval(x + offsetX, y + offsetY, fichaSize, fichaSize);
+                count++;
             }
         }
 
+        // DIBUJAR DADOS Y LEYENDA DE COLORES (misma posición que antes)
+        dibujarDadosYLeyenda(g2d);
+    }
+
+    // Extraigo la leyenda/dados a método para mantener paintComponent más claro
+    private void dibujarDadosYLeyenda(Graphics2D g2d) {
+        int y = (int) (19 * tamCasilla + 10);
         // Dados
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(10, 16 * tamCasilla + 10, 40, 40);
-        g2d.fillRect(60, 16 * tamCasilla + 10, 40, 40);
-        g2d.setColor(Color.BLACK);
-        g2d.drawRect(10, 16 * tamCasilla + 10, 40, 40);
-        g2d.drawRect(60, 16 * tamCasilla + 10, 40, 40);
-        g2d.setFont(new Font("Dialog", Font.BOLD, 18));
-        g2d.drawString(String.valueOf(dados[0]), 22, 16 * tamCasilla + 38);
-        g2d.drawString(String.valueOf(dados[1]), 72, 16 * tamCasilla + 38);
-
-        //COLORES
-        int y = (int) (17.5 * tamCasilla + 10);
-
-        g2d.setColor(new Color(255, 220, 80));
         g2d.fillRect(10, y, 40, 40);
-
+        g2d.fillRect(60, y, 40, 40);
         g2d.setColor(Color.BLACK);
         g2d.drawRect(10, y, 40, 40);
-        g2d.setFont(new Font("Dialog", Font.BOLD, 11));
-        g2d.setFont(new Font("Dialog", Font.BOLD, 12));
+        g2d.drawRect(60, y, 40, 40);
+        g2d.setFont(new Font("Dialog", Font.BOLD, 18));
+        g2d.drawString(String.valueOf(dados[0]), 25, y + 25);
+        g2d.drawString(String.valueOf(dados[1]), 75, y + 25);
 
-        int yBase = (int) (17.3 * tamCasilla + 38); // posición de la primera línea
-        int lineHeight = 16; // separación entre líneas 
+        // Leyenda de colores
+        int yBase = (int) (18.5 * tamCasilla + 38);
+        int lineHeight = 16;
 
-        g2d.drawString("salida ficha", 60, yBase);
-        g2d.drawString("amarilla", 60, yBase + lineHeight);
-
-        g2d.setColor(Color.RED); // 🔴 cambia el color a rojo
+        g2d.setColor(new Color(255, 220, 80));
         g2d.fillRect(160, y, 40, 40);
-
         g2d.setColor(Color.BLACK);
         g2d.drawRect(160, y, 40, 40);
-       g2d.drawString("salida ficha", 210, yBase);
-        g2d.drawString("roja", 210, yBase + lineHeight);
+        g2d.setFont(new Font("Dialog", Font.BOLD, 12));
+        g2d.drawString("salida ficha", 210, yBase);
+        g2d.drawString("amarilla", 210, yBase + lineHeight);
 
-        g2d.setColor(Color.BLUE); // 🔴 cambia el color a rojo
+        g2d.setColor(Color.RED);
         g2d.fillRect(320, y, 40, 40);
-
         g2d.setColor(Color.BLACK);
         g2d.drawRect(320, y, 40, 40);
-      g2d.drawString("salida ficha", 370, yBase);
-        g2d.drawString("azul", 370, yBase + lineHeight);
+        g2d.drawString("salida ficha", 370, yBase);
+        g2d.drawString("roja", 370, yBase + lineHeight);
 
-        g2d.setColor(Color.GREEN); // 🔴 cambia el color a rojo
+        g2d.setColor(Color.BLUE);
         g2d.fillRect(480, y, 40, 40);
-
         g2d.setColor(Color.BLACK);
         g2d.drawRect(480, y, 40, 40);
-       g2d.drawString("salida ficha", 530, yBase);
-        g2d.drawString("verde", 530
-                , yBase + lineHeight);
+        g2d.drawString("salida ficha", 530, yBase);
+        g2d.drawString("azul", 530, yBase + lineHeight);
 
+        g2d.setColor(Color.GREEN);
+        g2d.fillRect(640, y, 40, 40);
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(640, y, 40, 40);
+        g2d.drawString("salida ficha", 690, yBase);
+        g2d.drawString("verde", 690, yBase + lineHeight);
+
+        g2d.setColor(new Color(0, 200, 200));
+        g2d.fillRect(800, y, 40, 40);
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(800, y, 40, 40);
+        g2d.drawString("seguro", 850, yBase);
     }
-    
 
     public void actualizar() {
         repaint();

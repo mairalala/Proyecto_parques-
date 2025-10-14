@@ -1,17 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package juego_parques;
 
 import java.awt.Color;
 import java.awt.Point;
 
-/**
- *
- * @author monto
- */
 public class Casilla {
 
     private Point posicion;
@@ -49,8 +40,6 @@ public class Casilla {
             return getColorJugador();
         } else if ("seguro".equals(tipo)) {
             return new Color(0, 200, 200);
-        
-
         } else if ("pasillo".equals(tipo)) {
             return getColorJugador();
         } else if ("meeta".equals(tipo)) {
@@ -76,5 +65,10 @@ public class Casilla {
             default:
                 return Color.LIGHT_GRAY;
         }
+    }
+
+    // ✅ Nuevo método agregado
+    public boolean isSeguro() {
+        return "seguro".equals(tipo);
     }
 }
