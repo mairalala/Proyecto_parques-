@@ -90,7 +90,7 @@ public class Tablero {
         }
 
         // 🔹 Salidas
-        int[] salidas = {55, 4, 21, 38};
+        int[] salidas = {56, 4, 21, 38};
         String[] colores = {"Rojo", "Amarillo", "Verde", "Azul"};
         for (int k = 0; k < salidas.length; k++) {
             int idx = salidas[k];

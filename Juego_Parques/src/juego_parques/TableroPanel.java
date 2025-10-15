@@ -213,36 +213,12 @@ public class TableroPanel extends JPanel {
         int startY = 80 * tamCasilla;
         int width = 200;
         int height = 180;
-        
-        
-        
+
         // Fondo
-        /*g2d.setColor(new Color(240, 240, 240));
-        g2d.fillRoundRect(startX, startY, width, height, 20, 20);
-        g2d.setColor(Color.BLACK);
-        g2d.drawRoundRect(startX, startY, width, height, 20, 20);
-
-        
-
         // Dibujar cada color y su cantidad de fichas en meta
-        int i = 0;
-        for (Map.Entry<String, Integer> entry : marcador.entrySet()) {
-            String color = entry.getKey();
-            int puntos = entry.getValue();
-
-            // Dibujar color visual
-            g2d.setColor(obtenerColor(color));
-            g2d.fillRect(startX, startY + i * height, 20, 20);
-
-            // Dibujar texto
-            g2d.setColor(Color.BLACK);
-            g2d.drawRect(startX, startY + i * height, 20, 20);
-            g2d.drawString(color.toUpperCase() + ": " + puntos + " fichas", startX + 30, startY + 15 + i * lineHeight);
-            i++;
-        }*/
     }
 
-   private Color obtenerColor(String colorStr) {
+    private Color obtenerColor(String colorStr) {
         if (colorStr == null) {
             return Color.GRAY;
         }
@@ -304,7 +280,7 @@ public class TableroPanel extends JPanel {
         g2d.setColor(Color.BLACK);
         g2d.drawRect(650, y, 40, 40);
         g2d.drawString("seguro", 700, yBase); // antes 850
-        
+
         g2d.setFont(new Font("Dialog", Font.BOLD, 14));
         g2d.setColor(Color.BLACK);
         g2d.drawString("🏁 MARCADOR", 800, 10);
@@ -312,6 +288,7 @@ public class TableroPanel extends JPanel {
         g2d.fillRoundRect(800, 10, width, height, 20, 20);
         g2d.setColor(Color.BLACK);
         g2d.drawRoundRect(800, 10, width, height, 20, 20);
+       
 
         // Dibujar cada color y su cantidad de fichas en meta
         int i = 0;
