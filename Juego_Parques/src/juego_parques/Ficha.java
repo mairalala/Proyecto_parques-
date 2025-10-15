@@ -13,6 +13,7 @@ public class Ficha {
     private boolean dioVueltaCompleta = false;
     private boolean enPasillo = false;
     private int indiceSalidaOriginal = -1;
+    private boolean activa = true; // 🔹 Nueva propiedad: controla si la ficha puede moverse
 
     public Ficha(Color color) {
         this.color = color;
@@ -22,7 +23,8 @@ public class Ficha {
     }
 
     public void mover(int pasos, Tablero tablero) {
-        if (enBase || enMeta) {
+        // 🔹 No se mueve si está en base, en meta o inactiva
+        if (enBase || enMeta || !activa) {
             return;
         }
 
@@ -35,11 +37,18 @@ public class Ficha {
         int curr = indiceRuta < 0 ? 0 : indiceRuta;
         int entradaPasillo = findEntradaPasilloIndex(tablero, getColorStr());
 
+        // 🔹 Determinar cuál es la salida enemiga
+        int salidaEnemiga = getSalidaEnemigaIndex(tablero);
+
         for (int s = 1; s <= pasos; s++) {
             int idx = (curr + s) % ruta.size();
-            if (!dioVueltaCompleta && indiceSalidaOriginal >= 0 && idx == indiceSalidaOriginal) {
+
+            // Detectar cuando pasa por la salida enemiga
+            if (!dioVueltaCompleta && idx == salidaEnemiga) {
                 dioVueltaCompleta = true;
             }
+
+            // Si ya dio la vuelta y llega a la entrada de su pasillo
             if (dioVueltaCompleta && entradaPasillo >= 0 && idx == entradaPasillo) {
                 int pasosRestantes = pasos - s;
                 enPasillo = true;
@@ -51,9 +60,12 @@ public class Ficha {
 
                 int posPasillo = Math.min(pasosRestantes, pasillo.size() - 1);
                 posicion = pasillo.get(posPasillo).getPosicion();
+
+                // 🔹 Si llegó al final del pasillo (meta)
                 if (posPasillo >= pasillo.size() - 1) {
                     enMeta = true;
                     enPasillo = false;
+                    activa = false; // ✅ Se desactiva solo esta ficha
                 }
                 return;
             }
@@ -84,6 +96,7 @@ public class Ficha {
             enMeta = true;
             enPasillo = false;
             indiceRuta = -1;
+            activa = false; // ✅ Desactiva también si llega al final desde moverEnPasillo
         } else {
             posicion = pasillo.get(nuevaPos).getPosicion();
         }
@@ -114,6 +127,7 @@ public class Ficha {
         dioVueltaCompleta = false;
         indiceRuta = indiceSalida;
         indiceSalidaOriginal = indiceSalida;
+        activa = true; // ✅ Reactivar ficha si sale de base
         posicion = tablero.getCasillas().get(indiceSalida).getPosicion();
     }
 
@@ -123,6 +137,7 @@ public class Ficha {
         enMeta = false;
         dioVueltaCompleta = false;
         indiceRuta = -1;
+        activa = true; // ✅ Reactivar al volver a base
     }
 
     public String getColorStr() {
@@ -141,6 +156,28 @@ public class Ficha {
         return "Desconocido";
     }
 
+    private int getSalidaEnemigaIndex(Tablero tablero) {
+        String color = getColorStr().toLowerCase();
+        String enemigo = "";
+
+        switch (color) {
+            case "amarillo":
+                enemigo = "rojo";
+                break;
+            case "rojo":
+                enemigo = "azul";
+                break;
+            case "azul":
+                enemigo = "verde";
+                break;
+            case "verde":
+                enemigo = "amarillo";
+                break;
+        }
+
+        return tablero.getSalidaIndex(enemigo);
+    }
+
     public Color getColor() {
         return color;
     }
@@ -155,5 +192,10 @@ public class Ficha {
 
     public boolean haLlegadoAMeta() {
         return enMeta;
+    }
+
+    // ✅ Nuevo getter para saber si la ficha sigue activa
+    public boolean isActiva() {
+        return activa;
     }
 }

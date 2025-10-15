@@ -156,7 +156,7 @@ public class TableroPanel extends JPanel {
                             g2d.drawOval(x, y, fichaSize, fichaSize);
                         }
                     } else if (ficha.haLlegadoAMeta()) {
-                        Point pos = tablero.getMeta();
+                        Point pos = tablero.getMetaPorColor(jugador.getColorStr());
                         if (pos != null) {
                             int x = pos.x * tamCasilla + fichaOffset;
                             int y = pos.y * tamCasilla + fichaOffset;
@@ -165,7 +165,7 @@ public class TableroPanel extends JPanel {
                             g2d.setColor(Color.BLACK);
                             g2d.drawOval(x, y, fichaSize, fichaSize);
 
-                            // 🔹 Paso 2: actualizar marcador según color del jugador
+                            // 🔹 Actualizar marcador
                             String color = jugador.getColorStr();
                             marcador.put(color, marcador.getOrDefault(color, 0) + 1);
                         }
@@ -182,7 +182,8 @@ public class TableroPanel extends JPanel {
         }
 
         // Dibujar fichas en ruta/posiciones ocupadas
-        for (Map.Entry<Point, java.util.List<Ficha>> entry : fichasPorPosicion.entrySet()) {
+        for (Map.Entry<Point, java.util.List<Ficha>> entry
+                : fichasPorPosicion.entrySet()) {
             Point pos = entry.getKey();
             java.util.List<Ficha> fichasEnCasilla = entry.getValue();
             if (pos == null) {
@@ -208,15 +209,11 @@ public class TableroPanel extends JPanel {
         dibujarDadosYLeyenda(g2d);
     }
 
-    private void dibujarMarcador(Graphics2D g2d) {
-        int startX = 340 * tamCasilla + 30;
-        int startY = 80 * tamCasilla;
-        int width = 200;
-        int height = 180;
+    
 
         // Fondo
         // Dibujar cada color y su cantidad de fichas en meta
-    }
+    
 
     private Color obtenerColor(String colorStr) {
         if (colorStr == null) {
@@ -281,31 +278,7 @@ public class TableroPanel extends JPanel {
         g2d.drawRect(650, y, 40, 40);
         g2d.drawString("seguro", 700, yBase); // antes 850
 
-        g2d.setFont(new Font("Dialog", Font.BOLD, 14));
-        g2d.setColor(Color.BLACK);
-        g2d.drawString("🏁 MARCADOR", 800, 10);
-        g2d.setColor(new Color(240, 240, 240));
-        g2d.fillRoundRect(800, 10, width, height, 20, 20);
-        g2d.setColor(Color.BLACK);
-        g2d.drawRoundRect(800, 10, width, height, 20, 20);
-       
-
-        // Dibujar cada color y su cantidad de fichas en meta
-        int i = 0;
-        for (Map.Entry<String, Integer> entry : marcador.entrySet()) {
-            String color = entry.getKey();
-            int puntos = entry.getValue();
-
-            // Dibujar color visual
-            g2d.setColor(obtenerColor(color));
-            g2d.fillRect(810, 10 + i * height, 20, 20);
-
-            // Dibujar texto
-            g2d.setColor(Color.BLACK);
-            g2d.drawRect(830, 10 + i * height, 20, 20);
-            g2d.drawString(color.toUpperCase() + ": " + puntos + " fichas", 830 + 30, 10 + 15 + i * lineHeight);
-            i++;
-        }
+        
 
     }
 

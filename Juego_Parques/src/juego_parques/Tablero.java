@@ -90,7 +90,7 @@ public class Tablero {
         }
 
         // 🔹 Salidas
-        int[] salidas = {56, 4, 21, 38};
+        int[] salidas = {55, 4, 21, 38};
         String[] colores = {"Rojo", "Amarillo", "Verde", "Azul"};
         for (int k = 0; k < salidas.length; k++) {
             int idx = salidas[k];
@@ -106,40 +106,42 @@ public class Tablero {
     }
 
     private void inicializarPasillos() {
-        pasillos.put("Rojo", new ArrayList<>());
-        pasillos.put("Azul", new ArrayList<>());
-        pasillos.put("Verde", new ArrayList<>());
         pasillos.put("Amarillo", new ArrayList<>());
+        pasillos.put("Verde", new ArrayList<>());
+        pasillos.put("Azul", new ArrayList<>());
+        pasillos.put("Rojo", new ArrayList<>());
 
-        for (int y = 11; y <= 17; y++) {
-            pasillos.get("Amarillo").add(new Casilla(new Point(8, y), "pasillo", "Amarillo"));
+        // 🟡 Pasillo Amarillo (desde abajo al centro)
+        for (int y = 17; y >= 11; y--) {
+            pasillos.get("Verde").add(new Casilla(new Point(8, y), "pasillo", "Verde"));
         }
-        for (int x = 9; x <= 15; x++) {
-            pasillos.get("Verde").add(new Casilla(new Point(x, 9), "pasillo", "Verde"));
+
+        // 🟢 Pasillo Verde (desde la derecha al centro)
+        for (int x = 15; x >= 9; x--) {
+            pasillos.get("Azul").add(new Casilla(new Point(x, 9), "pasillo", "Azul"));
         }
+
+        // 🔵 Pasillo Azul (desde arriba hacia el centro)
         for (int y = 1; y <= 7; y++) {
-            pasillos.get("Azul").add(new Casilla(new Point(8, y), "pasillo", "Azul"));
+            pasillos.get("Rojo").add(new Casilla(new Point(8, y), "pasillo", "Rojo"));
         }
+
+        // 🔴 Pasillo Rojo (desde la izquierda hacia el centro)
         for (int x = 1; x <= 7; x++) {
-            pasillos.get("Rojo").add(new Casilla(new Point(x, 9), "pasillo", "Rojo"));
+            pasillos.get("Amarillo").add(new Casilla(new Point(x, 9), "pasillo", "Amarillo"));
         }
     }
 
     private void inicializarMeta() {
         meta = new Point(7, 7);
     }
-    /**
-     * Devuelve la casilla según la posición (ruta o pasillos)
-     */
+
     public Casilla getCasillaPorPosicion(Point p) {
-        // Buscar en la ruta principal
         for (Casilla c : ruta) {
             if (c.getPosicion().equals(p)) {
                 return c;
             }
         }
-
-        // Buscar en los pasillos de todos los colores
         for (ArrayList<Casilla> pasillo : pasillos.values()) {
             for (Casilla c : pasillo) {
                 if (c.getPosicion().equals(p)) {
@@ -147,7 +149,6 @@ public class Tablero {
                 }
             }
         }
-
         return null;
     }
 
@@ -158,5 +159,30 @@ public class Tablero {
     public Point getMeta() {
         return meta;
     }
-    
+
+    /**
+     * Retorna el índice de salida según el color.
+     */
+    public int getSalidaIndex(String color) {
+        switch (color.toLowerCase()) {
+            case "Amarillo":
+                return 4;
+            case "Verde":
+                return 21;
+            case "Azul":
+                return 38;
+            case "Rojo":
+                return 55;
+            default:
+                return 0;
+        }
+    }
+    public Point getMetaPorColor(String color) {
+        ArrayList<Casilla> pasillo = pasillos.get(color);
+        if (pasillo != null && !pasillo.isEmpty()) {
+            return pasillo.get(pasillo.size() - 1).getPosicion();
+        }
+        return null;
+    }
+
 }
