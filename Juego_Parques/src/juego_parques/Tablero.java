@@ -165,13 +165,13 @@ public class Tablero {
      */
     public int getSalidaIndex(String color) {
         switch (color.toLowerCase()) {
-            case "Amarillo":
+            case "amarillo":
                 return 4;
-            case "Verde":
+            case "verde":
                 return 21;
-            case "Azul":
+            case "azul":
                 return 38;
-            case "Rojo":
+            case "rojo":
                 return 55;
             default:
                 return 0;

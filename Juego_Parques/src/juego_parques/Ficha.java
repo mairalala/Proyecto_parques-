@@ -110,10 +110,12 @@ public class Ficha {
         }
 
         Point inicioPasillo = pasillo.get(0).getPosicion();
+
         for (int i = 0; i < ruta.size(); i++) {
             Point p = ruta.get(i).getPosicion();
-            if ((Math.abs(p.x - inicioPasillo.x) == 1 && Math.abs(p.y - inicioPasillo.y) == 0)
-                    || (Math.abs(p.x - inicioPasillo.x) == 0 && Math.abs(p.y - inicioPasillo.y) == 1)) {
+
+            // ✅ Detecta entrada aunque esté a 1 casilla de distancia
+            if (Math.abs(p.x - inicioPasillo.x) + Math.abs(p.y - inicioPasillo.y) <= 1) {
                 return i;
             }
         }

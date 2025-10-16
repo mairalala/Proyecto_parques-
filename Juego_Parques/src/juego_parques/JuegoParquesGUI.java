@@ -18,30 +18,114 @@ public class JuegoParquesGUI extends JFrame {
     public JuegoParquesGUI() {
         setTitle("Juego de Parqués");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 800);
-        setLayout(new BorderLayout());
 
-        // Crear jugadores
-        jugadores = new Jugador[]{
-            new Jugador("Rojo", Color.RED, 55),
-            new Jugador("Amarillo", Color.YELLOW, 4),
-            new Jugador("Verde", Color.GREEN, 21),
-            new Jugador("Azul", Color.BLUE, 38),};
+        // ✅ Pantalla completa
+        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        Rectangle bounds = env.getMaximumWindowBounds();
+        setBounds(bounds);
+        setResizable(false);
 
-        tablero = new Tablero();
-        panelTablero = new TableroPanel(tablero, jugadores);
-        add(panelTablero, BorderLayout.CENTER);
+        // --- Crear tablero ---
+        this.tablero = new Tablero();
 
-        // Panel superior para el botón
-        JPanel panelSuperior = new JPanel(new BorderLayout());
-        botonLanzar = new JButton("🎲 Lanzar Dados");
-        panelSuperior.add(botonLanzar, BorderLayout.EAST);
-        add(panelSuperior, BorderLayout.NORTH);
+        // --- Crear jugadores ---
+        this.jugadores = new Jugador[]{
+            new Jugador("Rojo", Color.RED, this.tablero.getSalidaIndex("Rojo")),
+            new Jugador("Amarillo", new Color(255, 220, 80), this.tablero.getSalidaIndex("Amarillo")),
+            new Jugador("Verde", Color.GREEN, this.tablero.getSalidaIndex("Verde")),
+            new Jugador("Azul", Color.BLUE, this.tablero.getSalidaIndex("Azul"))
+        };
 
-        // Listener del botón
+        // --- Crear panel del tablero ---
+        this.panelTablero = new TableroPanel(this.tablero, this.jugadores);
+        panelTablero.setOpaque(true);
+        add(crearPanelLeyenda(), BorderLayout.WEST);
+        
+
+        // --- Contenedor centrado ---
+        JPanel contenedor = new JPanel(new GridBagLayout());
+        contenedor.setBackground(Color.WHITE);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE; // evita estirarlo
+        contenedor.add(panelTablero, gbc);
+
+        panelTablero.setPreferredSize(new Dimension(800, 800)); // tamaño fijo visualmente centrado
+
+        // --- Ajuste automático del tamaño del tablero ---
+        contenedor.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                int w = Math.max(100, contenedor.getWidth() - 0);
+                int h = Math.max(100, contenedor.getHeight() - 0);
+                panelTablero.setPreferredSize(new Dimension(w, h));
+                panelTablero.revalidate();
+                panelTablero.repaint();
+            }
+        });
+
+        // ✅ Crear el botón y colocarlo directamente arriba a la derecha
+        JButton botonLanzar = new JButton("Lanzar Dados");
+        botonLanzar.setFont(new Font("Arial", Font.BOLD, 12));
+        botonLanzar.setFocusPainted(false);
+        botonLanzar.setBackground(new Color(70, 130, 180));
+        botonLanzar.setForeground(Color.WHITE);
+        botonLanzar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         botonLanzar.addActionListener(e -> lanzarDados());
 
+        // 🔹 Añadir directamente el botón arriba, alineado a la derecha
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 4));
+        top.setOpaque(false); // invisible, no se nota panel
+        top.add(botonLanzar);
+        add(top, BorderLayout.SOUTH);
+
+        // --- Añadir tablero ---
+        JPanel centro = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 15));
+        centro.setOpaque(true);
+        centro.setBackground(Color.WHITE);
+        centro.add(contenedor);
+        add(centro, BorderLayout.CENTER);
+
+        // --- Mostrar ---
+        setLocationRelativeTo(null);
         setVisible(true);
+        setVisible(true);
+    }
+
+    private JPanel crearPanelLeyenda() {
+        JPanel panelLeyenda = new JPanel();
+        panelLeyenda.setLayout(new BoxLayout(panelLeyenda, BoxLayout.Y_AXIS));
+        panelLeyenda.setBackground(Color.WHITE);
+        panelLeyenda.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 10));
+
+        String[] colores = {"Amarillo", "Rojo", "Azul", "Verde", "Seguro"};
+        Color[] colorValores = {
+            new Color(255, 220, 80), Color.RED, Color.BLUE, Color.GREEN, new Color(0, 200, 200)
+        };
+
+        for (int i = 0; i < colores.length; i++) {
+            JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+            fila.setBackground(Color.WHITE);
+
+            JLabel colorBox = new JLabel();
+            colorBox.setOpaque(true);
+            colorBox.setBackground(colorValores[i]);
+            colorBox.setPreferredSize(new Dimension(30, 30));
+            colorBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+            JLabel texto = new JLabel("Salida ficha " + colores[i].toLowerCase());
+            texto.setFont(new Font("Dialog", Font.PLAIN, 12));
+
+            fila.add(colorBox);
+            fila.add(texto);
+            panelLeyenda.add(fila);
+        }
+
+        return panelLeyenda;
     }
 
     private int intentosParaSalir = 0; // contador de intentos para sacar ficha

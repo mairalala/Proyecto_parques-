@@ -19,8 +19,12 @@ public class TableroPanel extends JPanel {
     public TableroPanel(Tablero tablero, Jugador[] jugadores) {
         this.tablero = tablero;
         this.jugadores = jugadores;
-        int dim = 25 * tamCasilla;
-        setPreferredSize(new Dimension(dim, dim + 100));
+        int dim = 20 * tamCasilla; // tamaño más proporcionado al centro
+        setPreferredSize(new Dimension(dim, dim));
+        setMaximumSize(new Dimension(dim, dim));
+        setMinimumSize(new Dimension(dim, dim));
+        setOpaque(true);
+        setBackground(Color.WHITE);
     }
 
     public void setDados(int[] tirada) {
@@ -65,7 +69,7 @@ public class TableroPanel extends JPanel {
         // Si tablero es null, no intentar dibujar ruta/pasillos/fichas
         if (tablero == null) {
             // dibujar leyenda de dados/colores y salir
-            dibujarDadosYLeyenda(g2d);
+           // Leyenda(g2d);
             return;
         }
 
@@ -206,15 +210,11 @@ public class TableroPanel extends JPanel {
         }
 
         // DIBUJAR DADOS Y LEYENDA DE COLORES (misma posición que antes)
-        dibujarDadosYLeyenda(g2d);
+        //Leyenda(g2d);
     }
 
-    
-
-        // Fondo
-        // Dibujar cada color y su cantidad de fichas en meta
-    
-
+    // Fondo
+    // Dibujar cada color y su cantidad de fichas en meta
     private Color obtenerColor(String colorStr) {
         if (colorStr == null) {
             return Color.GRAY;
@@ -234,53 +234,56 @@ public class TableroPanel extends JPanel {
     }
 
     // Extraigo la leyenda/dados a método para mantener paintComponent más claro
-    private void dibujarDadosYLeyenda(Graphics2D g2d) {
+   /* private void Leyenda(Graphics2D g2d) {
         int y = (int) (19 * tamCasilla + 10);
 
-        // Leyenda de colores
-        int yBase = (int) (18.5 * tamCasilla + 38);
+        // 🔹 Leyenda de colores (alineada a la izquierda y en columna)
+        int xBase = 0; // posición horizontal fija a la izquierda
+        int yBase = (int) (2 * tamCasilla + 20); // punto inicial vertical
+        int boxSize = 40;
         int lineHeight = 16;
-        int width = 200;
-        int height = 180;
+        int spacing = 70; // espacio entre cada bloque de color
 
+// 🟡 Amarillo
         g2d.setColor(new Color(255, 220, 80));
-        g2d.fillRect(50, y, 40, 40); // antes 160
+        g2d.fillRect(xBase, yBase, boxSize, boxSize);
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(50, y, 40, 40);
-        g2d.setFont(new Font("Dialog", Font.BOLD, 12));
-        g2d.drawString("salida ficha", 100, yBase); // antes 210
-        g2d.drawString("amarilla", 100, yBase + lineHeight);
+        g2d.drawRect(xBase, yBase, boxSize, boxSize);
+        g2d.drawString("salida ficha amarilla", xBase + 50, yBase + 25);
 
+// 🔴 Rojo
+        yBase += spacing;
         g2d.setColor(Color.RED);
-        g2d.fillRect(200, y, 40, 40); // antes 320
+        g2d.fillRect(xBase, yBase, boxSize, boxSize);
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(200, y, 40, 40);
-        g2d.drawString("salida ficha", 250, yBase); // antes 370
-        g2d.drawString("roja", 250, yBase + lineHeight);
+        g2d.drawRect(xBase, yBase, boxSize, boxSize);
+        g2d.drawString("salida ficha roja", xBase + 50, yBase + 25);
 
+// 🔵 Azul
+        yBase += spacing;
         g2d.setColor(Color.BLUE);
-        g2d.fillRect(350, y, 40, 40); // antes 480
+        g2d.fillRect(xBase, yBase, boxSize, boxSize);
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(350, y, 40, 40);
-        g2d.drawString("salida ficha", 400, yBase); // antes 530
-        g2d.drawString("azul", 400, yBase + lineHeight);
+        g2d.drawRect(xBase, yBase, boxSize, boxSize);
+        g2d.drawString("salida ficha azul", xBase + 50, yBase + 25);
 
+// 🟢 Verde
+        yBase += spacing;
         g2d.setColor(Color.GREEN);
-        g2d.fillRect(500, y, 40, 40); // antes 640
+        g2d.fillRect(xBase, yBase, boxSize, boxSize);
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(500, y, 40, 40);
-        g2d.drawString("salida ficha", 550, yBase); // antes 690
-        g2d.drawString("verde", 550, yBase + lineHeight);
+        g2d.drawRect(xBase, yBase, boxSize, boxSize);
+        g2d.drawString("salida ficha verde", xBase + 50, yBase + 25);
 
+// 🟦 Seguro
+        yBase += spacing;
         g2d.setColor(new Color(0, 200, 200));
-        g2d.fillRect(650, y, 40, 40); // antes 800
+        g2d.fillRect(xBase, yBase, boxSize, boxSize);
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(650, y, 40, 40);
-        g2d.drawString("seguro", 700, yBase); // antes 850
+        g2d.drawRect(xBase, yBase, boxSize, boxSize);
+        g2d.drawString("casilla segura", xBase + 50, yBase + 25);
 
-        
-
-    }
+    }*/
 
     public void actualizar() {
         repaint();
