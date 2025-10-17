@@ -14,9 +14,15 @@ public class Jugador {
         this.nombre = nombre;
         this.color = color;
         this.indiceSalida = indiceSalida;
+        
+        // ✅ Inicializar antes de usar
         fichas = new ArrayList<>();
+        
+        // 🔹 Crear y numerar fichas
         for (int i = 0; i < 4; i++) {
-            fichas.add(new Ficha(color));
+            Ficha f = new Ficha(color);
+            f.setNumero(i + 1);
+            fichas.add(f);
         }
     }
 
@@ -37,18 +43,10 @@ public class Jugador {
     }
 
     public String getColorStr() {
-        if (color.equals(Color.RED)) {
-            return "Rojo";
-        }
-        if (color.equals(Color.YELLOW)) {
-            return "Amarillo";
-        }
-        if (color.equals(Color.GREEN)) {
-            return "Verde";
-        }
-        if (color.equals(Color.BLUE)) {
-            return "Azul";
-        }
+        if (color.equals(Color.RED)) return "Rojo";
+        if (color.equals(Color.YELLOW)) return "Amarillo";
+        if (color.equals(Color.GREEN)) return "Verde";
+        if (color.equals(Color.BLUE)) return "Azul";
         return "Desconocido";
     }
 

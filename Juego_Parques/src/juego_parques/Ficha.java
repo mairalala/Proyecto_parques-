@@ -200,4 +200,15 @@ public class Ficha {
     public boolean isActiva() {
         return activa;
     }
+    
+    private int numero; // nuevo campo
+
+public int getNumero() {
+    return numero;
+}
+
+public void setNumero(int numero) {
+    this.numero = numero;
+}
+
 }

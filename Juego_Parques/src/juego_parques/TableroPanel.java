@@ -31,6 +31,10 @@ public class TableroPanel extends JPanel {
         this.dados = tirada;
     }
 
+    /**
+     *
+     * @param g
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -69,7 +73,7 @@ public class TableroPanel extends JPanel {
         // Si tablero es null, no intentar dibujar ruta/pasillos/fichas
         if (tablero == null) {
             // dibujar leyenda de dados/colores y salir
-           // Leyenda(g2d);
+            // Leyenda(g2d);
             return;
         }
 
@@ -158,6 +162,14 @@ public class TableroPanel extends JPanel {
                             g2d.fillOval(x, y, fichaSize, fichaSize);
                             g2d.setColor(Color.BLACK);
                             g2d.drawOval(x, y, fichaSize, fichaSize);
+                            g2d.setFont(new Font("Arial", Font.BOLD, 14));
+                            g2d.setColor(Color.WHITE);
+                            String numeroStr = String.valueOf(ficha.getNumero());
+                            FontMetrics fm = g2d.getFontMetrics();
+                            int textWidth = fm.stringWidth(numeroStr);
+                            int textHeight = fm.getAscent();
+                            g2d.drawString(numeroStr, x + (fichaSize - textWidth) / 2, y + (fichaSize + textHeight) / 2 - 3);
+
                         }
                     } else if (ficha.haLlegadoAMeta()) {
                         Point pos = tablero.getMetaPorColor(jugador.getColorStr());
@@ -206,6 +218,15 @@ public class TableroPanel extends JPanel {
                 g2d.setColor(Color.BLACK);
                 g2d.drawOval(x + offsetX, y + offsetY, fichaSize, fichaSize);
                 count++;
+                g2d.setFont(new Font("Arial", Font.BOLD, 14));
+                g2d.setColor(Color.WHITE);
+                String numeroStr = String.valueOf(ficha.getNumero());
+                FontMetrics fm = g2d.getFontMetrics();
+                int textWidth = fm.stringWidth(numeroStr);
+                int textHeight = fm.getAscent();
+                g2d.drawString(numeroStr, x + offsetX + (fichaSize - textWidth) / 2,
+                        y + offsetY + (fichaSize + textHeight) / 2 - 3);
+
             }
         }
 
@@ -234,7 +255,7 @@ public class TableroPanel extends JPanel {
     }
 
     // Extraigo la leyenda/dados a método para mantener paintComponent más claro
-   /* private void Leyenda(Graphics2D g2d) {
+    /* private void Leyenda(Graphics2D g2d) {
         int y = (int) (19 * tamCasilla + 10);
 
         // 🔹 Leyenda de colores (alineada a la izquierda y en columna)
@@ -284,7 +305,6 @@ public class TableroPanel extends JPanel {
         g2d.drawString("casilla segura", xBase + 50, yBase + 25);
 
     }*/
-
     public void actualizar() {
         repaint();
     }
