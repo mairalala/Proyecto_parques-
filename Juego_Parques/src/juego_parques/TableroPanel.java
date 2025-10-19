@@ -202,8 +202,8 @@ public class TableroPanel extends JPanel {
 
     // 🔹 Dibuja el número centrado según la forma
     private void dibujarNumeroFicha(Graphics2D g2d, Ficha ficha, int x, int y, int fichaSize) {
-        g2d.setFont(new Font("Arial", Font.BOLD, 14));
-        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 15));
+        g2d.setColor(Color.black);
 
         String numeroStr = String.valueOf(ficha.getNumero());
         FontMetrics fm = g2d.getFontMetrics();
@@ -211,13 +211,13 @@ public class TableroPanel extends JPanel {
         int textHeight = fm.getAscent();
 
         int textX = x + (fichaSize - textWidth) / 2;
-        int textY = y + (fichaSize + textHeight) / 2 - 3;
+        int textY = y + (fichaSize + textHeight) / 2 - -1;
 
         Color colorFicha = ficha.getColor();
         if (colorFicha.equals(new Color(255, 220, 80))) {
             textY -= 3; // Rombo
         } else if (colorFicha.equals(Color.BLUE)) {
-            textY -= 6; // Triángulo
+            textY -= 4; // Triángulo
         } else if (colorFicha.equals(Color.GREEN)) {
             textY -= 2; // Hexágono
         }
