@@ -177,6 +177,7 @@ public class Tablero {
                 return 0;
         }
     }
+
     public Point getMetaPorColor(String color) {
         ArrayList<Casilla> pasillo = pasillos.get(color);
         if (pasillo != null && !pasillo.isEmpty()) {
