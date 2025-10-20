@@ -19,16 +19,21 @@ public class JuegoParquesGUI extends JFrame {
         setTitle("Juego de Parqués");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // ✅ Pantalla completa
+        // Pantalla completa
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         Rectangle bounds = env.getMaximumWindowBounds();
         setBounds(bounds);
         setResizable(false);
 
-        // --- Crear tablero ---
+        // --- Panel de fondo con textura de madera ---
+        FondoPanel fondo = new FondoPanel("/juego_parques/madera_001.JPG");
+        fondo.setLayout(new BorderLayout());
+        setContentPane(fondo);
+
+        // Crear tablero
         this.tablero = new Tablero();
 
-        // --- Crear jugadores ---
+        // Crear jugadores
         this.jugadores = new Jugador[]{
             new Jugador("Rojo", Color.RED, this.tablero.getSalidaIndex("Rojo")),
             new Jugador("Amarillo", new Color(255, 220, 80), this.tablero.getSalidaIndex("Amarillo")),
@@ -36,70 +41,66 @@ public class JuegoParquesGUI extends JFrame {
             new Jugador("Azul", Color.BLUE, this.tablero.getSalidaIndex("Azul"))
         };
 
-        // --- Crear panel del tablero ---
+        // Crear panel del tablero
         this.panelTablero = new TableroPanel(this.tablero, this.jugadores);
-        panelTablero.setOpaque(true);
-        add(crearPanelLeyenda(), BorderLayout.WEST);
-        
+        panelTablero.setOpaque(false); // importante para ver el fondo
 
-        // --- Contenedor centrado ---
+        // Panel de leyenda
+        fondo.add(crearPanelLeyenda(), BorderLayout.WEST);
+
+        // Contenedor centrado
         JPanel contenedor = new JPanel(new GridBagLayout());
-        contenedor.setBackground(Color.WHITE);
+        contenedor.setOpaque(false); // transparente para mostrar fondo
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.NONE; // evita estirarlo
         contenedor.add(panelTablero, gbc);
 
-        panelTablero.setPreferredSize(new Dimension(800, 800)); // tamaño fijo visualmente centrado
+        panelTablero.setPreferredSize(new Dimension(800, 800));
 
-        // --- Ajuste automático del tamaño del tablero ---
+        // Ajuste del tamaño
         contenedor.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override
             public void componentResized(java.awt.event.ComponentEvent e) {
-                int w = Math.max(100, contenedor.getWidth() - 0);
-                int h = Math.max(100, contenedor.getHeight() - 0);
+                int w = Math.max(100, contenedor.getWidth());
+                int h = Math.max(100, contenedor.getHeight());
                 panelTablero.setPreferredSize(new Dimension(w, h));
                 panelTablero.revalidate();
                 panelTablero.repaint();
             }
         });
 
-        // ✅ Crear el botón y colocarlo directamente arriba a la derecha
-        JButton botonLanzar = new JButton("Lanzar Dados");
+        // Botón "Lanzar Dados"
+        botonLanzar = new JButton("Lanzar Dados");
         botonLanzar.setFont(new Font("Arial", Font.BOLD, 12));
         botonLanzar.setFocusPainted(false);
         botonLanzar.setBackground(new Color(70, 130, 180));
         botonLanzar.setForeground(Color.WHITE);
         botonLanzar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
         botonLanzar.addActionListener(e -> lanzarDados());
 
-        // 🔹 Añadir directamente el botón arriba, alineado a la derecha
+        // Panel superior con botón
         JPanel top = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 4));
-        top.setOpaque(false); // invisible, no se nota panel
+        top.setOpaque(false);
         top.add(botonLanzar);
-        add(top, BorderLayout.SOUTH);
+        fondo.add(top, BorderLayout.SOUTH);
 
-        // --- Añadir tablero ---
+        // Panel central
         JPanel centro = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 15));
-        centro.setOpaque(true);
-        centro.setBackground(Color.WHITE);
+        centro.setOpaque(false);
         centro.add(contenedor);
-        add(centro, BorderLayout.CENTER);
+        fondo.add(centro, BorderLayout.CENTER);
 
-        // --- Mostrar ---
         setLocationRelativeTo(null);
-        setVisible(true);
         setVisible(true);
     }
 
     private JPanel crearPanelLeyenda() {
         JPanel panelLeyenda = new JPanel();
         panelLeyenda.setLayout(new BoxLayout(panelLeyenda, BoxLayout.Y_AXIS));
-        panelLeyenda.setBackground(Color.WHITE);
+        panelLeyenda.setOpaque(false);
         panelLeyenda.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 10));
 
         String[] colores = {"Amarillo", "Rojo", "Azul", "Verde", "Seguro"};
@@ -109,7 +110,7 @@ public class JuegoParquesGUI extends JFrame {
 
         for (int i = 0; i < colores.length; i++) {
             JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-            fila.setBackground(Color.WHITE);
+            fila.setOpaque(false);
 
             JLabel colorBox = new JLabel();
             colorBox.setOpaque(true);
@@ -119,6 +120,7 @@ public class JuegoParquesGUI extends JFrame {
 
             JLabel texto = new JLabel("Salida ficha " + colores[i].toLowerCase());
             texto.setFont(new Font("Dialog", Font.PLAIN, 12));
+            texto.setForeground(Color.BLACK);
 
             fila.add(colorBox);
             fila.add(texto);
@@ -128,7 +130,7 @@ public class JuegoParquesGUI extends JFrame {
         return panelLeyenda;
     }
 
-    private int intentosParaSalir = 0; // contador de intentos para sacar ficha
+    private int intentosParaSalir = 0;
 
     private void lanzarDados() {
         Jugador jugador = jugadores[turno];
@@ -139,25 +141,23 @@ public class JuegoParquesGUI extends JFrame {
 
         boolean todasEnBase = jugador.getFichas().stream().allMatch(Ficha::isEnBase);
 
-        // --- Si todas las fichas están en base ---
         if (todasEnBase) {
             intentosParaSalir++;
             if (dado1 == dado2) {
-                // Saca una ficha de la base
                 for (Ficha ficha : jugador.getFichas()) {
                     if (ficha.isEnBase()) {
                         ficha.sacarDeBase(tablero, jugador.getIndiceSalida());
-                        JOptionPane.showMessageDialog(this, jugador.getNombre() + " sacó una ficha de la base en el intento " + intentosParaSalir + ".");
+                        JOptionPane.showMessageDialog(this, jugador.getNombre() + " sacó una ficha en el intento " + intentosParaSalir);
                         panelTablero.repaint();
-                        intentosParaSalir = 0; // reinicia los intentos
-                        lanzarDados(); // puede volver a lanzar
+                        intentosParaSalir = 0;
+                        lanzarDados();
                         return;
                     }
                 }
             } else {
                 if (intentosParaSalir < 3) {
                     JOptionPane.showMessageDialog(this, jugador.getNombre() + " no sacó par. Intento " + intentosParaSalir + " de 3.");
-                    return; // puede volver a intentar
+                    return;
                 } else {
                     JOptionPane.showMessageDialog(this, "3 intentos sin sacar par. Turno perdido.");
                     intentosParaSalir = 0;
@@ -167,10 +167,8 @@ public class JuegoParquesGUI extends JFrame {
             }
         }
 
-        // --- Si ya tiene fichas fuera de base ---
-        intentosParaSalir = 0; // ya no aplica la regla de los tres intentos
+        intentosParaSalir = 0;
 
-        // Si saca par, puede mover o sacar otra ficha
         if (dado1 == dado2) {
             boolean sacoFicha = false;
             for (Ficha ficha : jugador.getFichas()) {
@@ -188,7 +186,6 @@ public class JuegoParquesGUI extends JFrame {
             return;
         }
 
-        // Movimiento normal
         moverFicha(dado1 + dado2);
     }
 
@@ -196,7 +193,6 @@ public class JuegoParquesGUI extends JFrame {
         Jugador jugador = jugadores[turno];
         ArrayList<Ficha> fichas = jugador.getFichas();
 
-        // Filtrar las fichas que están fuera de la base y no han llegado a la meta
         ArrayList<Ficha> fichasFuera = new ArrayList<>();
         for (Ficha f : fichas) {
             if (!f.isEnBase() && !f.haLlegadoAMeta()) {
@@ -204,7 +200,6 @@ public class JuegoParquesGUI extends JFrame {
             }
         }
 
-        // Si no hay fichas fuera, no se puede mover
         if (fichasFuera.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No hay fichas fuera de la base para mover.");
             siguienteTurno();
@@ -213,7 +208,6 @@ public class JuegoParquesGUI extends JFrame {
 
         Ficha fichaSeleccionada;
 
-        // Si hay más de una ficha, preguntar cuál mover
         if (fichasFuera.size() > 1) {
             String[] opciones = new String[fichasFuera.size()];
             for (int i = 0; i < fichasFuera.size(); i++) {
@@ -275,43 +269,43 @@ public class JuegoParquesGUI extends JFrame {
                 if (ficha == fichaAtacante) {
                     continue;
                 }
-
                 if (!ficha.isEnBase() && !ficha.haLlegadoAMeta()
                         && ficha.getPosicion().equals(pos)
                         && ficha.getColor() != fichaAtacante.getColor()) {
-
                     Casilla casilla = tablero.getCasillaPorPosicion(pos);
                     if (casilla != null && casilla.isSeguro()) {
-                        System.out.println("No se puede comer ficha en seguro.");
                         return;
                     }
-
                     ficha.volverABase();
-                    System.out.println("La ficha " + colorToString(ficha.getColor())
-                            + " fue comida por " + colorToString(fichaAtacante.getColor()));
                     return;
                 }
             }
         }
     }
 
-    private String colorToString(Color c) {
-        if (Color.RED.equals(c)) {
-            return "ROJA";
-        }
-        if (Color.BLUE.equals(c)) {
-            return "AZUL";
-        }
-        if (Color.GREEN.equals(c)) {
-            return "VERDE";
-        }
-        if (Color.YELLOW.equals(c)) {
-            return "AMARILLA";
-        }
-        return "DESCONOCIDO";
-    }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(JuegoParquesGUI::new);
+    }
+}
+
+// ✅ Clase auxiliar para el fondo de madera
+class FondoPanel extends JPanel {
+
+    private Image imagen;
+
+    public FondoPanel(String ruta) {
+        try {
+            imagen = new ImageIcon(getClass().getResource(ruta)).getImage();
+        } catch (Exception e) {
+            System.out.println("❌ No se pudo cargar la imagen de fondo: " + ruta);
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (imagen != null) {
+            g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 }
