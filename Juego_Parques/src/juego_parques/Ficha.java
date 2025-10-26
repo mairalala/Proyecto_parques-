@@ -1,214 +1,88 @@
 package juego_parques;
 
-import java.awt.*;
-import java.util.ArrayList;
+import java.awt.Color;
+import java.awt.Point;
 
 public class Ficha {
 
     private Color color;
+    private String colorStr;
+    private int numero;
+    private boolean enBase = true;
+    private boolean haLlegadoAMeta = false;
     private Point posicion;
-    private int indiceRuta;
-    private boolean enBase;
-    private boolean enMeta;
-    private boolean dioVueltaCompleta = false;
-    private boolean enPasillo = false;
-    private int indiceSalidaOriginal = -1;
-    private boolean activa = true; // 🔹 Nueva propiedad: controla si la ficha puede moverse
+    private int indiceCasilla = -1; // índice en la ruta principal o pasillo
 
     public Ficha(Color color) {
         this.color = color;
-        this.enBase = true;
-        this.enMeta = false;
-        this.indiceRuta = -1;
+        this.colorStr = asignarColorStr(color);
     }
 
-    public void mover(int pasos, Tablero tablero) {
-        // 🔹 No se mueve si está en base, en meta o inactiva
-        if (enBase || enMeta || !activa) {
-            return;
-        }
-
-        if (enPasillo) {
-            moverEnPasillo(pasos, tablero);
-            return;
-        }
-
-        ArrayList<Casilla> ruta = tablero.getCasillas();
-        int curr = indiceRuta < 0 ? 0 : indiceRuta;
-        int entradaPasillo = findEntradaPasilloIndex(tablero, getColorStr());
-
-        // 🔹 Determinar cuál es la salida enemiga
-        int salidaEnemiga = getSalidaEnemigaIndex(tablero);
-
-        for (int s = 1; s <= pasos; s++) {
-            int idx = (curr + s) % ruta.size();
-
-            // Detectar cuando pasa por la salida enemiga
-            if (!dioVueltaCompleta && idx == salidaEnemiga) {
-                dioVueltaCompleta = true;
-            }
-
-            // Si ya dio la vuelta y llega a la entrada de su pasillo
-            if (dioVueltaCompleta && entradaPasillo >= 0 && idx == entradaPasillo) {
-                int pasosRestantes = pasos - s;
-                enPasillo = true;
-                indiceRuta = -1;
-                ArrayList<Casilla> pasillo = tablero.getPasillos().get(getColorStr());
-                if (pasillo == null || pasillo.isEmpty()) {
-                    return;
-                }
-
-                int posPasillo = Math.min(pasosRestantes, pasillo.size() - 1);
-                posicion = pasillo.get(posPasillo).getPosicion();
-
-                // 🔹 Si llegó al final del pasillo (meta)
-                if (posPasillo >= pasillo.size() - 1) {
-                    enMeta = true;
-                    enPasillo = false;
-                    activa = false; // ✅ Se desactiva solo esta ficha
-                }
-                return;
-            }
-        }
-
-        int nueva = (curr + pasos) % ruta.size();
-        indiceRuta = nueva;
-        posicion = ruta.get(indiceRuta).getPosicion();
-    }
-
-    private void moverEnPasillo(int pasos, Tablero tablero) {
-        ArrayList<Casilla> pasillo = tablero.getPasillos().get(getColorStr());
-        if (pasillo == null || pasillo.isEmpty()) {
-            return;
-        }
-
-        int posActual = 0;
-        for (int i = 0; i < pasillo.size(); i++) {
-            if (pasillo.get(i).getPosicion().equals(posicion)) {
-                posActual = i;
-                break;
-            }
-        }
-
-        int nuevaPos = posActual + pasos;
-        if (nuevaPos >= pasillo.size() - 1) {
-            posicion = pasillo.get(pasillo.size() - 1).getPosicion();
-            enMeta = true;
-            enPasillo = false;
-            indiceRuta = -1;
-            activa = false; // ✅ Desactiva también si llega al final desde moverEnPasillo
-        } else {
-            posicion = pasillo.get(nuevaPos).getPosicion();
-        }
-    }
-
-    private int findEntradaPasilloIndex(Tablero tablero, String colorStr) {
-        ArrayList<Casilla> ruta = tablero.getCasillas();
-        ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
-        if (pasillo == null || pasillo.isEmpty()) {
-            return -1;
-        }
-
-        Point inicioPasillo = pasillo.get(0).getPosicion();
-
-        for (int i = 0; i < ruta.size(); i++) {
-            Point p = ruta.get(i).getPosicion();
-
-            // ✅ Detecta entrada aunque esté a 1 casilla de distancia
-            if (Math.abs(p.x - inicioPasillo.x) + Math.abs(p.y - inicioPasillo.y) <= 1) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public void sacarDeBase(Tablero tablero, int indiceSalida) {
-        enBase = false;
-        enMeta = false;
-        enPasillo = false;
-        dioVueltaCompleta = false;
-        indiceRuta = indiceSalida;
-        indiceSalidaOriginal = indiceSalida;
-        activa = true; // ✅ Reactivar ficha si sale de base
-        posicion = tablero.getCasillas().get(indiceSalida).getPosicion();
-    }
-
-    public void volverABase() {
-        enBase = true;
-        enPasillo = false;
-        enMeta = false;
-        dioVueltaCompleta = false;
-        indiceRuta = -1;
-        activa = true; // ✅ Reactivar al volver a base
-    }
-
-    public String getColorStr() {
-        if (color.equals(Color.RED)) {
-            return "Rojo";
-        }
-        if (color.equals(Color.YELLOW)) {
-            return "Amarillo";
-        }
-        if (color.equals(Color.GREEN)) {
-            return "Verde";
-        }
-        if (color.equals(Color.BLUE)) {
-            return "Azul";
-        }
+    private String asignarColorStr(Color color) {
+        if (color.equals(Color.RED)) return "Rojo";
+        if (color.equals(Color.YELLOW) || color.equals(new Color(255, 220, 0))) return "Amarillo";
+        if (color.equals(Color.GREEN)) return "Verde";
+        if (color.equals(Color.BLUE)) return "Azul";
         return "Desconocido";
     }
 
-    private int getSalidaEnemigaIndex(Tablero tablero) {
-        String color = getColorStr().toLowerCase();
-        String enemigo = "";
+    public Color getColor() { return color; }
+    public String getColorStr() { return colorStr; }
+    public int getNumero() { return numero; }
+    public void setNumero(int numero) { this.numero = numero; }
+    public boolean isEnBase() { return enBase; }
+    public boolean haLlegadoAMeta() { return haLlegadoAMeta; }
+    public Point getPosicion() { return posicion; }
+    public void setPosicion(Point p) { this.posicion = p; }
 
-        switch (color) {
-            case "amarillo":
-                enemigo = "rojo";
-                break;
-            case "rojo":
-                enemigo = "azul";
-                break;
-            case "azul":
-                enemigo = "verde";
-                break;
-            case "verde":
-                enemigo = "amarillo";
-                break;
+    // Sacar ficha de base
+    public void sacarDeBase(int salidaIndex, Tablero tablero) {
+        this.enBase = false;
+        this.indiceCasilla = salidaIndex;
+        this.posicion = tablero.obtenerCasilla(salidaIndex);
+    }
+
+    // Volver a la base
+    public void volverABase() {
+        this.enBase = true;
+        this.haLlegadoAMeta = false;
+        this.indiceCasilla = -1;
+        this.posicion = null;
+    }
+
+    // Mover ficha por ruta y pasillo
+    public void mover(int pasos, Tablero tablero) {
+        if (enBase || haLlegadoAMeta) return;
+
+        int rutaSize = tablero.getCasillas().size();
+        int nuevoIndice = indiceCasilla + pasos;
+
+        // Verificar si entra al pasillo
+        for (int i = indiceCasilla + 1; i <= nuevoIndice; i++) {
+            if (i < rutaSize) {
+                Casilla c = tablero.getCasillas().get(i);
+                if ("salida".equals(c.getTipo()) && colorStr.equals(c.getColor())) {
+                    // Entrar al pasillo correspondiente
+                    int pasosRestantes = nuevoIndice - i;
+                    int indexPasillo = 0;
+                    for (Casilla pasillo : tablero.getPasillos().get(colorStr)) {
+                        if (indexPasillo < pasosRestantes) {
+                            posicion = pasillo.getPosicion();
+                            indexPasillo++;
+                        } else break;
+                    }
+                    if (posicion.equals(tablero.getMetaPorColor(colorStr))) {
+                        haLlegadoAMeta = true;
+                    }
+                    indiceCasilla = rutaSize; // marcar que está en pasillo
+                    return;
+                }
+            }
         }
 
-        return tablero.getSalidaIndex(enemigo);
+        // Si no entra al pasillo
+        if (nuevoIndice >= rutaSize) nuevoIndice = rutaSize - 1;
+        indiceCasilla = nuevoIndice;
+        posicion = tablero.obtenerCasilla(indiceCasilla);
     }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public Point getPosicion() {
-        return posicion;
-    }
-
-    public boolean isEnBase() {
-        return enBase;
-    }
-
-    public boolean haLlegadoAMeta() {
-        return enMeta;
-    }
-
-    // ✅ Nuevo getter para saber si la ficha sigue activa
-    public boolean isActiva() {
-        return activa;
-    }
-    
-    private int numero; // nuevo campo
-
-public int getNumero() {
-    return numero;
-}
-
-public void setNumero(int numero) {
-    this.numero = numero;
-}
-
 }

@@ -2,310 +2,129 @@ package juego_parques;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Random;
-import java.awt.Point;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
 
 public class JuegoParquesGUI extends JFrame {
 
     private Tablero tablero;
     private TableroPanel panelTablero;
     private Jugador[] jugadores;
-    private int turno = 0;
-    private Random random = new Random();
-    private JButton botonLanzar;
+    private JugadorGUI controladorTurnos;
+    private ReproductorSonido reproductor;
+    private PanelInfoLateral panelInfo;
+    private PanelConfiguracion panelConfiguracion;
+    private PanelPausa panelPausa;
+    private boolean modoOscuro;
+    private FondoPanel fondo;
 
-    public JuegoParquesGUI() {
-        setTitle("Juego de Parqués");
+    public JuegoParquesGUI(int cantidadJugadores, ReproductorSonido reproductor, boolean modoOscuro) {
+        this.reproductor = reproductor;
+        this.modoOscuro = modoOscuro;
+
+        setTitle("🎲 Juego de Parqués");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setLayout(new BorderLayout());
 
-        // Pantalla completa
-        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        Rectangle bounds = env.getMaximumWindowBounds();
-        setBounds(bounds);
-        setResizable(false);
-
-        // --- Panel de fondo con textura de madera ---
-        FondoPanel fondo = new FondoPanel("/juego_parques/madera_001.JPG");
+        // Fondo
+        fondo = new FondoPanel(
+            "/juego_parques/imagenClaro.png",
+            "/juego_parques/imagenOscuro.JPG",
+            modoOscuro
+        );
         fondo.setLayout(new BorderLayout());
         setContentPane(fondo);
 
-        // Crear tablero
-        this.tablero = new Tablero();
+        // ---------- Crear tablero ----------
+        tablero = new Tablero();
+        tablero.setCantidadJugadores(cantidadJugadores);
 
-        // Crear jugadores
-        this.jugadores = new Jugador[]{
-            new Jugador("Rojo", Color.RED, this.tablero.getSalidaIndex("Rojo")),
-            new Jugador("Amarillo", new Color(255, 220, 80), this.tablero.getSalidaIndex("Amarillo")),
-            new Jugador("Verde", Color.GREEN, this.tablero.getSalidaIndex("Verde")),
-            new Jugador("Azul", Color.BLUE, this.tablero.getSalidaIndex("Azul"))
-        };
+        // ---------- Crear jugadores ----------
+        Color[] coloresTodos = {Color.RED, new Color(255, 220, 0), Color.GREEN, Color.BLUE};
+        String[] nombresTodos = {"Rojo", "Amarillo", "Verde", "Azul"};
 
-        // Crear panel del tablero
-        this.panelTablero = new TableroPanel(this.tablero, this.jugadores);
-        panelTablero.setOpaque(false); // importante para ver el fondo
+        String[] nombres;
+        Color[] colores;
 
-        // Panel de leyenda
-        fondo.add(crearPanelLeyenda(), BorderLayout.WEST);
+        if (cantidadJugadores == 2) {
+            nombres = new String[]{"Rojo", "Verde"};
+            colores = new Color[]{Color.RED, Color.GREEN};
+        } else {
+            nombres = nombresTodos;
+            colores = coloresTodos;
+        }
 
-        // Contenedor centrado
-        JPanel contenedor = new JPanel(new GridBagLayout());
-        contenedor.setOpaque(false); // transparente para mostrar fondo
+        jugadores = new Jugador[cantidadJugadores];
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-        contenedor.add(panelTablero, gbc);
-
-        panelTablero.setPreferredSize(new Dimension(800, 800));
-
-        // Ajuste del tamaño
-        contenedor.addComponentListener(new java.awt.event.ComponentAdapter() {
-            @Override
-            public void componentResized(java.awt.event.ComponentEvent e) {
-                int w = Math.max(100, contenedor.getWidth());
-                int h = Math.max(100, contenedor.getHeight());
-                panelTablero.setPreferredSize(new Dimension(w, h));
-                panelTablero.revalidate();
-                panelTablero.repaint();
+        for (int i = 0; i < cantidadJugadores; i++) {
+            jugadores[i] = new Jugador(nombres[i], colores[i], tablero);
+            for (Ficha ficha : jugadores[i].getFichas()) {
+                ficha.volverABase(); // Inicialmente todas en base
             }
-        });
 
-        // Botón "Lanzar Dados"
-        botonLanzar = new JButton("Lanzar Dados");
-        botonLanzar.setFont(new Font("Arial", Font.BOLD, 12));
-        botonLanzar.setFocusPainted(false);
-        botonLanzar.setBackground(new Color(70, 130, 180));
-        botonLanzar.setForeground(Color.WHITE);
-        botonLanzar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        botonLanzar.addActionListener(e -> lanzarDados());
+            // Colocar fichas inicialmente en base
+            Point[] posicionesBase = tablero.getPosicionesBase(jugadores[i].getColorStr());
+            for (int f = 0; f < jugadores[i].getFichas().size(); f++) {
+                Ficha ficha = jugadores[i].getFichas().get(f);
+                ficha.volverABase();
+                if (posicionesBase != null && posicionesBase.length > f)
+                    ficha.setPosicion(posicionesBase[f]);
+            }
+        }
 
-        // Panel superior con botón
-        JPanel top = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 4));
-        top.setOpaque(false);
-        top.add(botonLanzar);
-        fondo.add(top, BorderLayout.SOUTH);
+        // ---------- Panel tablero ----------
+        panelTablero = new TableroPanel(tablero, jugadores, modoOscuro);
+        fondo.add(panelTablero, BorderLayout.CENTER);
 
-        // Panel central
-        JPanel centro = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 15));
-        centro.setOpaque(false);
-        centro.add(contenedor);
-        fondo.add(centro, BorderLayout.CENTER);
+        // ---------- Panel lateral ----------
+        panelInfo = new PanelInfoLateral(modoOscuro);
+        fondo.add(panelInfo, BorderLayout.EAST);
 
+        // ---------- Controlador ----------
+        controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero, reproductor, panelInfo);
+        fondo.add(controladorTurnos, BorderLayout.SOUTH);
+
+        // ---------- Panel de pausa ----------
+        panelPausa = new PanelPausa(this);
+        getLayeredPane().add(panelPausa, JLayeredPane.POPUP_LAYER);
+        panelPausa.setVisible(false); // oculto al inicio
+
+        // Música de fondo
+        if (!reproductor.estaReproduciendoFondo())
+            reproductor.reproducirMusicaFondo("fondo.wav");
+
+        pack();
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    private JPanel crearPanelLeyenda() {
-        JPanel panelLeyenda = new JPanel();
-        panelLeyenda.setLayout(new BoxLayout(panelLeyenda, BoxLayout.Y_AXIS));
-        panelLeyenda.setOpaque(false);
-        panelLeyenda.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 10));
-
-        String[] colores = {"Amarillo", "Rojo", "Azul", "Verde", "Seguro"};
-        Color[] colorValores = {
-            new Color(255, 220, 80), Color.RED, Color.BLUE, Color.GREEN, new Color(0, 200, 200)
-        };
-
-        for (int i = 0; i < colores.length; i++) {
-            JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-            fila.setOpaque(false);
-
-            JLabel colorBox = new JLabel();
-            colorBox.setOpaque(true);
-            colorBox.setBackground(colorValores[i]);
-            colorBox.setPreferredSize(new Dimension(30, 30));
-            colorBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-            JLabel texto = new JLabel("Salida ficha " + colores[i].toLowerCase());
-            texto.setFont(new Font("Dialog", Font.PLAIN, 12));
-            texto.setForeground(Color.BLACK);
-
-            fila.add(colorBox);
-            fila.add(texto);
-            panelLeyenda.add(fila);
-        }
-
-        return panelLeyenda;
-    }
-
-    private int intentosParaSalir = 0;
-
-    private void lanzarDados() {
-        Jugador jugador = jugadores[turno];
-        int dado1 = random.nextInt(6) + 1;
-        int dado2 = random.nextInt(6) + 1;
-
-        JOptionPane.showMessageDialog(this, jugador.getNombre() + " lanzó: " + dado1 + " y " + dado2);
-
-        boolean todasEnBase = jugador.getFichas().stream().allMatch(Ficha::isEnBase);
-
-        if (todasEnBase) {
-            intentosParaSalir++;
-            if (dado1 == dado2) {
-                for (Ficha ficha : jugador.getFichas()) {
-                    if (ficha.isEnBase()) {
-                        ficha.sacarDeBase(tablero, jugador.getIndiceSalida());
-                        JOptionPane.showMessageDialog(this, jugador.getNombre() + " sacó una ficha en el intento " + intentosParaSalir);
-                        panelTablero.repaint();
-                        intentosParaSalir = 0;
-                        lanzarDados();
-                        return;
-                    }
-                }
-            } else {
-                if (intentosParaSalir < 3) {
-                    JOptionPane.showMessageDialog(this, jugador.getNombre() + " no sacó par. Intento " + intentosParaSalir + " de 3.");
-                    return;
-                } else {
-                    JOptionPane.showMessageDialog(this, "3 intentos sin sacar par. Turno perdido.");
-                    intentosParaSalir = 0;
-                    siguienteTurno();
-                    return;
-                }
-            }
-        }
-
-        intentosParaSalir = 0;
-
-        if (dado1 == dado2) {
-            boolean sacoFicha = false;
-            for (Ficha ficha : jugador.getFichas()) {
-                if (ficha.isEnBase()) {
-                    ficha.sacarDeBase(tablero, jugador.getIndiceSalida());
-                    sacoFicha = true;
-                    JOptionPane.showMessageDialog(this, jugador.getNombre() + " sacó una ficha adicional. ¡Vuelve a lanzar!");
-                    panelTablero.repaint();
-                    lanzarDados();
-                    return;
-                }
-            }
-            JOptionPane.showMessageDialog(this, jugador.getNombre() + " sacó par, pero no tiene fichas en base. Mueve una ficha.");
-            moverFicha(dado1 + dado2);
-            return;
-        }
-
-        moverFicha(dado1 + dado2);
-    }
-
-    private void moverFicha(int total) {
-        Jugador jugador = jugadores[turno];
-        ArrayList<Ficha> fichas = jugador.getFichas();
-
-        ArrayList<Ficha> fichasFuera = new ArrayList<>();
-        for (Ficha f : fichas) {
-            if (!f.isEnBase() && !f.haLlegadoAMeta()) {
-                fichasFuera.add(f);
-            }
-        }
-
-        if (fichasFuera.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay fichas fuera de la base para mover.");
-            siguienteTurno();
-            return;
-        }
-
-        Ficha fichaSeleccionada;
-
-        if (fichasFuera.size() > 1) {
-            String[] opciones = new String[fichasFuera.size()];
-            for (int i = 0; i < fichasFuera.size(); i++) {
-                Ficha f = fichasFuera.get(i);
-                Point pos = f.getPosicion();
-                opciones[i] = "Ficha " + (i + 1) + " en (" + pos.x + ", " + pos.y + ")";
-            }
-            String seleccion = (String) JOptionPane.showInputDialog(
-                    this,
-                    "Tienes varias fichas fuera. ¿Cuál deseas mover?",
-                    "Elegir ficha a mover",
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    opciones,
-                    opciones[0]);
-
-            if (seleccion == null) {
-                JOptionPane.showMessageDialog(this, "No seleccionaste ninguna ficha.");
-                siguienteTurno();
-                return;
-            }
-
-            int index = -1;
-            for (int i = 0; i < opciones.length; i++) {
-                if (opciones[i].equals(seleccion)) {
-                    index = i;
-                    break;
-                }
-            }
-            fichaSeleccionada = fichasFuera.get(index);
-        } else {
-            fichaSeleccionada = fichasFuera.get(0);
-        }
-
-        fichaSeleccionada.mover(total, tablero);
-        verificarComerFicha(fichaSeleccionada);
-
-        JOptionPane.showMessageDialog(this, jugador.getNombre() + " movió una ficha " + total + " casillas.");
-        panelTablero.repaint();
-
-        if (jugador.haGanado()) {
-            JOptionPane.showMessageDialog(this, "🎉 " + jugador.getNombre() + " ha ganado el juego!");
-            botonLanzar.setEnabled(false);
-            return;
-        }
-
-        siguienteTurno();
-    }
-
-    private void siguienteTurno() {
-        turno = (turno + 1) % jugadores.length;
-        setTitle("Turno de: " + jugadores[turno].getNombre());
-    }
-
-    private void verificarComerFicha(Ficha fichaAtacante) {
-        Point pos = fichaAtacante.getPosicion();
-        for (Jugador jugador : jugadores) {
-            for (Ficha ficha : jugador.getFichas()) {
-                if (ficha == fichaAtacante) {
-                    continue;
-                }
-                if (!ficha.isEnBase() && !ficha.haLlegadoAMeta()
-                        && ficha.getPosicion().equals(pos)
-                        && ficha.getColor() != fichaAtacante.getColor()) {
-                    Casilla casilla = tablero.getCasillaPorPosicion(pos);
-                    if (casilla != null && casilla.isSeguro()) {
-                        return;
-                    }
-                    ficha.volverABase();
-                    return;
-                }
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(JuegoParquesGUI::new);
-    }
-}
-
-// ✅ Clase auxiliar para el fondo de madera
-class FondoPanel extends JPanel {
-
-    private Image imagen;
-
-    public FondoPanel(String ruta) {
+    public void cambiarTema(boolean oscuro) {
         try {
-            imagen = new ImageIcon(getClass().getResource(ruta)).getImage();
+            if (oscuro) FlatDarkLaf.setup();
+            else FlatLightLaf.setup();
+
+            SwingUtilities.updateComponentTreeUI(this);
+            this.modoOscuro = oscuro;
+
+            fondo.setModoOscuro(oscuro);
+            panelTablero.setModoOscuro(oscuro);
+            panelInfo.setModoOscuro(oscuro);
+
         } catch (Exception e) {
-            System.out.println("❌ No se pudo cargar la imagen de fondo: " + ruta);
+            e.printStackTrace();
         }
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        if (imagen != null) {
-            g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
+    public void mostrarPanelConfiguracion() {
+        if (panelConfiguracion == null) {
+            panelConfiguracion = new PanelConfiguracion(this, reproductor, modoOscuro);
         }
+        panelConfiguracion.setVisible(true);
+    }
+
+    public void mostrarPanelPausa() {
+        panelPausa.centrarEnParent(this);
+        panelPausa.setVisible(true);
     }
 }
