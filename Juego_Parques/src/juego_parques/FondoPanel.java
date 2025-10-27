@@ -12,13 +12,12 @@ public class FondoPanel extends JPanel {
     public FondoPanel(String rutaClaro, String rutaOscuro, boolean modoOscuro) {
         this.modoOscuro = modoOscuro;
         try {
-            imagenClaro = new ImageIcon(getClass().getResource("imagenClaro.png")).getImage();
-
+            imagenClaro = new ImageIcon(getClass().getResource("/juego_parques/imagenClaro.png")).getImage();
         } catch (Exception e) {
             System.out.println("❌ No se pudo cargar imagen clara: " + rutaClaro);
         }
         try {
-            imagenOscuro = new ImageIcon(getClass().getResource("imagenOscuro.jpg")).getImage();
+            imagenOscuro = new ImageIcon(getClass().getResource("/juego_parques/imagenOscuro.jpg")).getImage();
         } catch (Exception e) {
             System.out.println("❌ No se pudo cargar imagen oscura: " + rutaOscuro);
         }

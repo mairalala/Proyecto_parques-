@@ -23,7 +23,7 @@ public class PanelConfiguracion extends JDialog {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(new Color(0, 0, 0, 180)); // Fondo semi-transparente
+                g.setColor(new Color(0, 0, 0, 180));
                 g.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
             }
         };
@@ -55,7 +55,7 @@ public class PanelConfiguracion extends JDialog {
         panelFondo.add(btnCerrar);
 
         setSize(350, 250);
-        setLocationRelativeTo(parent); // siempre centrado sobre el padre
+        setLocationRelativeTo(parent);
     }
 
     private void actualizarModoOscuro(boolean modo) {

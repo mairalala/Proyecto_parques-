@@ -11,7 +11,7 @@ public class Ficha {
     private boolean enBase = true;
     private boolean haLlegadoAMeta = false;
     private Point posicion;
-    private int indiceCasilla = -1; // índice en la ruta principal o pasillo
+    private int indiceCasilla = -1;
 
     public Ficha(Color color) {
         this.color = color;
@@ -35,14 +35,12 @@ public class Ficha {
     public Point getPosicion() { return posicion; }
     public void setPosicion(Point p) { this.posicion = p; }
 
-    // Sacar ficha de base
     public void sacarDeBase(int salidaIndex, Tablero tablero) {
         this.enBase = false;
         this.indiceCasilla = salidaIndex;
         this.posicion = tablero.obtenerCasilla(salidaIndex);
     }
 
-    // Volver a la base
     public void volverABase() {
         this.enBase = true;
         this.haLlegadoAMeta = false;
@@ -50,19 +48,16 @@ public class Ficha {
         this.posicion = null;
     }
 
-    // Mover ficha por ruta y pasillo
     public void mover(int pasos, Tablero tablero) {
         if (enBase || haLlegadoAMeta) return;
 
         int rutaSize = tablero.getCasillas().size();
         int nuevoIndice = indiceCasilla + pasos;
 
-        // Verificar si entra al pasillo
         for (int i = indiceCasilla + 1; i <= nuevoIndice; i++) {
             if (i < rutaSize) {
                 Casilla c = tablero.getCasillas().get(i);
                 if ("salida".equals(c.getTipo()) && colorStr.equals(c.getColor())) {
-                    // Entrar al pasillo correspondiente
                     int pasosRestantes = nuevoIndice - i;
                     int indexPasillo = 0;
                     for (Casilla pasillo : tablero.getPasillos().get(colorStr)) {
@@ -71,18 +66,26 @@ public class Ficha {
                             indexPasillo++;
                         } else break;
                     }
-                    if (posicion.equals(tablero.getMetaPorColor(colorStr))) {
-                        haLlegadoAMeta = true;
-                    }
-                    indiceCasilla = rutaSize; // marcar que está en pasillo
+                    if (posicion.equals(tablero.getMetaPorColor(colorStr))) haLlegadoAMeta = true;
+                    indiceCasilla = rutaSize;
                     return;
                 }
             }
         }
 
-        // Si no entra al pasillo
         if (nuevoIndice >= rutaSize) nuevoIndice = rutaSize - 1;
         indiceCasilla = nuevoIndice;
         posicion = tablero.obtenerCasilla(indiceCasilla);
+    }
+
+    public void moverConAnimacion(int pasos, Tablero tablero, TableroPanel panel) {
+        new Thread(() -> {
+            for (int i = 0; i < pasos; i++) {
+                mover(1, tablero);
+                panel.setFichaActiva(this);
+                panel.repaint();
+                try { Thread.sleep(300); } catch (InterruptedException e) { e.printStackTrace(); }
+            }
+        }).start();
     }
 }

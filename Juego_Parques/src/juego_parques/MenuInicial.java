@@ -2,6 +2,8 @@ package juego_parques;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class MenuInicial extends JFrame {
 
@@ -23,43 +25,101 @@ public class MenuInicial extends JFrame {
         Rectangle bounds = env.getMaximumWindowBounds();
         setBounds(bounds);
 
+        // Fondo con modo claro/oscuro
         fondo = new FondoPanel(
-            "/juego_parques/fondo_claro.png",
-            "/juego_parques/fondo_oscuro.png",
-            modoOscuro
+                "/juego_parques/fondo_claro.png",
+                "/juego_parques/fondo_oscuro.png",
+                modoOscuro
         );
         fondo.setLayout(new BorderLayout());
         setContentPane(fondo);
 
-        // 🎵 Música de fondo
+        // Música de fondo
         if (!reproductorGlobal.estaReproduciendoFondo()) {
             reproductorGlobal.reproducirMusicaFondo("fondo.wav");
         }
 
+        // Panel central transparente
         JPanel panelCentral = new JPanel();
         panelCentral.setOpaque(false);
         panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.Y_AXIS));
-        panelCentral.setBorder(BorderFactory.createEmptyBorder(100, 0, 100, 0));
+        panelCentral.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
 
+        // PANEL DEL TÍTULO MÁS GRANDE
+        JPanel panelTitulo = new JPanel(new BorderLayout());
+        panelTitulo.setOpaque(false);
+        panelTitulo.setPreferredSize(new Dimension(0, 200)); // altura mayor para que los dados no se corten
+
+        // Título con sombra
         JLabel titulo = new JLabel("🎲 PARQUÉS GUI 🎲", SwingConstants.CENTER);
-        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         titulo.setFont(new Font("Segoe UI Emoji", Font.BOLD, 70));
         titulo.setForeground(Color.WHITE);
-        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 50, 0));
-        panelCentral.add(titulo);
 
+        // Sombra del título
+        titulo.setUI(new javax.swing.plaf.basic.BasicLabelUI() {
+            @Override
+            public void paint(Graphics g, JComponent c) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setColor(Color.GRAY);
+                g2d.setFont(titulo.getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = (c.getWidth() - fm.stringWidth(titulo.getText())) / 2;
+                int y = fm.getAscent() + 10; // sombra centrada
+                g2d.drawString(titulo.getText(), x + 4, y + 200); // desplazamiento para sombra
+                g2d.dispose();
+                super.paint(g, c);
+            }
+        });
+
+        panelTitulo.add(titulo, BorderLayout.CENTER);
+        panelCentral.add(panelTitulo);
+        panelCentral.add(Box.createRigidArea(new Dimension(0, 50))); // espacio debajo del título
+
+        // Botones con estilo moderno y efecto hover
         JButton btnJugar = crearBoton("🟢 JUGAR", new Color(0, 150, 0));
         JButton btnCreditos = crearBoton("💫 CRÉDITOS", new Color(0, 102, 204));
         JButton btnConfig = crearBoton("⚙ CONFIGURACIÓN", new Color(102, 102, 102));
         JButton btnSalir = crearBoton("❌ SALIR", new Color(200, 0, 0));
 
+        // Efecto hover
+        JButton[] botones = {btnJugar, btnCreditos, btnConfig, btnSalir};
+        for (JButton b : botones) {
+            b.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    b.setBackground(b.getBackground().brighter());
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    b.setBackground(b.getBackground().darker());
+                }
+            });
+        }
+
+        // Acciones de los botones
         btnJugar.addActionListener(e -> {
-            String[] opciones = {"2 Jugadores", "4 Jugadores"};
+            String[] opciones = {"2 Jugadores", "3 Jugadores", "4 Jugadores"};
             int seleccion = JOptionPane.showOptionDialog(this,
                     "Elige cantidad de jugadores:", "Seleccionar jugadores",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                     null, opciones, opciones[1]);
-            int cantJugadores = (seleccion == 0) ? 2 : 4;
+
+            int cantJugadores;
+            switch (seleccion) {
+                case 0:
+                    cantJugadores = 2;
+                    break;
+                case 1:
+                    cantJugadores = 3;
+                    break;
+                case 2:
+                    cantJugadores = 4;
+                    break;
+                default:
+                    cantJugadores = 2;
+            }
+
             new JuegoParquesGUI(cantJugadores, reproductorGlobal, modoOscuro);
             dispose();
         });
@@ -68,13 +128,11 @@ public class MenuInicial extends JFrame {
         btnConfig.addActionListener(e -> mostrarPanelFlotante(configuracionPanel()));
         btnSalir.addActionListener(e -> System.exit(0));
 
-        panelCentral.add(btnJugar);
-        panelCentral.add(Box.createRigidArea(new Dimension(0, 15)));
-        panelCentral.add(btnCreditos);
-        panelCentral.add(Box.createRigidArea(new Dimension(0, 15)));
-        panelCentral.add(btnConfig);
-        panelCentral.add(Box.createRigidArea(new Dimension(0, 15)));
-        panelCentral.add(btnSalir);
+        // Separadores y añadir botones al panel central
+        for (JButton b : botones) {
+            panelCentral.add(b);
+            panelCentral.add(Box.createRigidArea(new Dimension(0, 20)));
+        }
 
         fondo.add(panelCentral, BorderLayout.CENTER);
         setVisible(true);
@@ -82,13 +140,14 @@ public class MenuInicial extends JFrame {
 
     private JButton crearBoton(String texto, Color color) {
         JButton b = new JButton(texto);
-        b.setFont(new Font("Arial", Font.BOLD, 20));
+        b.setFont(new Font("Arial", Font.BOLD, 24));
         b.setFocusPainted(false);
-        b.setBackground(color);
+        b.setBackground(color.darker());
         b.setForeground(Color.WHITE);
         b.setAlignmentX(Component.CENTER_ALIGNMENT);
-        b.setMaximumSize(new Dimension(300, 50));
+        b.setMaximumSize(new Dimension(350, 60));
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        b.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2, true));
         return b;
     }
 
@@ -167,8 +226,8 @@ public class MenuInicial extends JFrame {
         sliderMusica.setMajorTickSpacing(25);
         sliderMusica.setPaintTicks(true);
         sliderMusica.setPaintLabels(true);
-        sliderMusica.addChangeListener(e ->
-                reproductorGlobal.ajustarVolumenMusica(sliderMusica.getValue() / 100f));
+        sliderMusica.addChangeListener(e
+                -> reproductorGlobal.ajustarVolumenMusica(sliderMusica.getValue() / 100f));
         panel.add(sliderMusica);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
 
@@ -192,7 +251,7 @@ public class MenuInicial extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
+                Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setColor(new Color(0, 0, 0, 180));
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
             }

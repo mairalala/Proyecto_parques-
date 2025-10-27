@@ -3,7 +3,6 @@ package juego_parques;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import java.util.Map;
 
 public class TableroPanel extends JPanel {
 
@@ -11,6 +10,7 @@ public class TableroPanel extends JPanel {
     private Tablero tablero;
     private int tamCasilla = 40;
     private boolean modoOscuro;
+    private Ficha fichaActiva = null; // 🔹 ficha seleccionada activa
 
     public TableroPanel(Tablero tablero, Jugador[] jugadores, boolean modoOscuro) {
         this.tablero = tablero;
@@ -27,6 +27,10 @@ public class TableroPanel extends JPanel {
     public void setModoOscuro(boolean modo) {
         this.modoOscuro = modo;
         repaint();
+    }
+
+    public void setFichaActiva(Ficha ficha) {
+        this.fichaActiva = ficha;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class TableroPanel extends JPanel {
 
         // Dibujar bases
         for (String color : new String[]{"Rojo", "Amarillo", "Verde", "Azul"}) {
-            Point inicio = tablero.getPosicionesBase(color)[0]; // esquina superior izquierda
+            Point inicio = tablero.getPosicionesBase(color)[0];
             dibujarBaseConFichas(g2d, offsetX, offsetY, color, inicio);
         }
 
@@ -72,10 +76,19 @@ public class TableroPanel extends JPanel {
         for (Jugador jugador : jugadores) {
             List<Ficha> fichas = jugador.getFichas();
             for (Ficha ficha : fichas) {
-                if (ficha.isEnBase()) continue; // no dibujar fichas que están en base
+                if (ficha.isEnBase()) continue;
+
                 Point pos = ficha.getPosicion();
                 int fx = offsetX + pos.x * tamCasilla + 5;
                 int fy = offsetY + pos.y * tamCasilla + 5;
+
+                // 🔹 si es ficha activa, dibujar borde luminoso
+                if (ficha.equals(fichaActiva)) {
+                    g2d.setColor(Color.WHITE);
+                    g2d.setStroke(new BasicStroke(3));
+                    g2d.drawOval(fx - 2, fy - 2, fichaSize + 4, fichaSize + 4);
+                }
+
                 g2d.setColor(ficha.getColor());
                 g2d.fillOval(fx, fy, fichaSize, fichaSize);
                 g2d.setColor(Color.BLACK);
@@ -103,11 +116,9 @@ public class TableroPanel extends JPanel {
         int x = offsetX + inicio.x * tamCasilla - (baseSize - tamCasilla) / 2;
         int y = offsetY + inicio.y * tamCasilla - (baseSize - tamCasilla) / 2;
 
-        // Dibujar el cuadrado de la base
         g2d.setColor(baseColor);
         g2d.fillRect(x, y, baseSize, baseSize);
 
-        // Dibujar fichas dentro de la base (centradas en 2x2)
         int fichaSize = tamCasilla - 10;
         int padding = (baseSize - 2 * fichaSize) / 3;
 
@@ -117,7 +128,8 @@ public class TableroPanel extends JPanel {
             List<Ficha> fichas = jugador.getFichas();
             for (int i = 0; i < fichas.size(); i++) {
                 Ficha f = fichas.get(i);
-                if (!f.isEnBase()) continue; // solo dibujar si está en base
+                if (!f.isEnBase()) continue;
+
                 int row = i / 2;
                 int col = i % 2;
                 int fx = x + padding + col * (fichaSize + padding);

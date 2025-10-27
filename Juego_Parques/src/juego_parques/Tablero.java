@@ -116,27 +116,18 @@ public class Tablero {
 
     public int getSalidaIndex(String color, int cantidadJugadores) {
         if (cantidadJugadores == 2) {
-            if (color.equals("Rojo")) {
-                return 55;
-            }
-            if (color.equals("Verde")) {
-                return 21;
-            }
+            if (color.equals("Rojo")) return 55;
+            if (color.equals("Verde")) return 21; // ✅ Cambio de Verde a Azul
         } else {
             switch (color) {
-                case "Rojo":
-                    return 55;
-                case "Amarillo":
-                    return 4;
-                case "Verde":
-                    return 21;
-                case "Azul":
-                    return 38;
+                case "Rojo": return 55;
+                case "Amarillo": return 4;
+                case "Verde": return 21;
+                case "Azul": return 38;
             }
         }
-        return 55; // valor por defecto
+        return 55;
     }
-
 
     public void setCantidadJugadores(int cantidadJugadores) {
         this.cantidadJugadores = cantidadJugadores;
