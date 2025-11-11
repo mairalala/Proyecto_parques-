@@ -11,6 +11,14 @@ public class TableroPanel extends JPanel {
     private int tamCasilla = 40;
     private boolean modoOscuro;
     private Ficha fichaActiva = null; // 🔹 ficha seleccionada activa
+    private int dado1 = 1;
+    private int dado2 = 1;
+
+    public void setDados(int d1, int d2) {
+        this.dado1 = d1;
+        this.dado2 = d2;
+        repaint(); // esto redibuja la pantalla
+    }
 
     public TableroPanel(Tablero tablero, Jugador[] jugadores, boolean modoOscuro) {
         this.tablero = tablero;
@@ -33,7 +41,6 @@ public class TableroPanel extends JPanel {
         this.fichaActiva = ficha;
     }
 
-    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
@@ -76,7 +83,9 @@ public class TableroPanel extends JPanel {
         for (Jugador jugador : jugadores) {
             List<Ficha> fichas = jugador.getFichas();
             for (Ficha ficha : fichas) {
-                if (ficha.isEnBase()) continue;
+                if (ficha.isEnBase()) {
+                    continue;
+                }
 
                 Point pos = ficha.getPosicion();
                 int fx = offsetX + pos.x * tamCasilla + 5;
@@ -102,15 +111,82 @@ public class TableroPanel extends JPanel {
                 g2d.drawString(numStr, textX, textY);
             }
         }
+        // 🎲 Dibujar los dados
+        dibujarDado(g2d, offsetX - 80, getHeight() / 2 - 60, dado1);
+        dibujarDado(g2d, offsetX - 80, getHeight() / 2 + 10, dado2);
+
+    }
+
+    private void dibujarDado(Graphics2D g2d, int x, int y, int valor) {
+        int size = 50;
+
+        g2d.setColor(Color.WHITE);
+        g2d.fillRoundRect(x, y, size, size, 10, 10);
+
+        g2d.setColor(Color.BLACK);
+        g2d.drawRoundRect(x, y, size, size, 10, 10);
+
+        int dot = 8;
+        int cx = x + size / 2;
+        int cy = y + size / 2;
+
+        switch (valor) {
+            case 1:
+
+                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+
+                break;
+            case 2: {
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+            }
+            break;
+            case 3: {
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+            }
+            break;
+            case 4: {
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(x + size - 20, y + 10, dot, dot);
+                g2d.fillOval(x + 10, y + size - 20, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+            }
+            break;
+            case 5: {
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(x + size - 20, y + 10, dot, dot);
+                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+                g2d.fillOval(x + 10, y + size - 20, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+            }
+            break;
+            case 6: {
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(x + 10, y + size / 2 - dot / 2, dot, dot);
+                g2d.fillOval(x + 10, y + size - 20, dot, dot);
+                g2d.fillOval(x + size - 20, y + 10, dot, dot);
+                g2d.fillOval(x + size - 20, y + size / 2 - dot / 2, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+            }
+            break;
+        }
     }
 
     private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
         Color baseColor;
-        if ("Rojo".equals(color)) baseColor = new Color(255, 0, 0, 100);
-        else if ("Amarillo".equals(color)) baseColor = new Color(255, 255, 0, 100);
-        else if ("Verde".equals(color)) baseColor = new Color(0, 255, 0, 100);
-        else if ("Azul".equals(color)) baseColor = new Color(0, 0, 255, 100);
-        else baseColor = new Color(200, 200, 200, 100);
+        if ("Rojo".equals(color)) {
+            baseColor = new Color(255, 0, 0, 100);
+        } else if ("Amarillo".equals(color)) {
+            baseColor = new Color(255, 255, 0, 100);
+        } else if ("Verde".equals(color)) {
+            baseColor = new Color(0, 255, 0, 100);
+        } else if ("Azul".equals(color)) {
+            baseColor = new Color(0, 0, 255, 100);
+        } else {
+            baseColor = new Color(200, 200, 200, 100);
+        }
 
         int baseSize = 7 * tamCasilla;
         int x = offsetX + inicio.x * tamCasilla - (baseSize - tamCasilla) / 2;
@@ -123,12 +199,16 @@ public class TableroPanel extends JPanel {
         int padding = (baseSize - 2 * fichaSize) / 3;
 
         for (Jugador jugador : jugadores) {
-            if (!jugador.getColorStr().equals(color)) continue;
+            if (!jugador.getColorStr().equals(color)) {
+                continue;
+            }
 
             List<Ficha> fichas = jugador.getFichas();
             for (int i = 0; i < fichas.size(); i++) {
                 Ficha f = fichas.get(i);
-                if (!f.isEnBase()) continue;
+                if (!f.isEnBase()) {
+                    continue;
+                }
 
                 int row = i / 2;
                 int col = i % 2;
@@ -150,7 +230,9 @@ public class TableroPanel extends JPanel {
     }
 
     private Color adaptarColor(Color colorOriginal) {
-        if (!modoOscuro) return colorOriginal;
+        if (!modoOscuro) {
+            return colorOriginal;
+        }
         int r = Math.max(0, colorOriginal.getRed() - 50);
         int g = Math.max(0, colorOriginal.getGreen() - 50);
         int b = Math.max(0, colorOriginal.getBlue() - 50);

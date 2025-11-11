@@ -6,7 +6,7 @@ import java.awt.*;
 public class PanelInfoLateral extends JPanel {
 
     private JLabel lblJugador;
-    private JLabel lblDado;
+   // private JLabel lblDado;
     private JLabel lblFichasMeta;
     private JLabel lblMensaje;
     private boolean modoOscuro;
@@ -22,9 +22,9 @@ public class PanelInfoLateral extends JPanel {
         lblJugador.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
         lblJugador.setAlignmentX(CENTER_ALIGNMENT);
 
-        lblDado = new JLabel("Dado: -");
-        lblDado.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, 16));
-        lblDado.setAlignmentX(CENTER_ALIGNMENT);
+        //lblDado = new JLabel("Dado: -");
+        //lblDado.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, 16));
+        //lblDado.setAlignmentX(CENTER_ALIGNMENT);
 
         lblFichasMeta = new JLabel("Fichas en meta: 0");
         lblFichasMeta.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, 16));
@@ -37,7 +37,7 @@ public class PanelInfoLateral extends JPanel {
 
         add(lblJugador);
         add(Box.createRigidArea(new Dimension(0, 15)));
-        add(lblDado);
+        //add(lblDado);
         add(Box.createRigidArea(new Dimension(0, 15)));
         add(lblFichasMeta);
         add(Box.createRigidArea(new Dimension(0, 20)));
@@ -49,7 +49,7 @@ public class PanelInfoLateral extends JPanel {
     public void actualizarInfo(String jugador, int dado1, int dado2, int intentos,
                                int fichasMeta, String mensaje) {
         lblJugador.setText("Jugador: " + jugador);
-        lblDado.setText("Dado: " + dado1 + " + " + dado2 + " = " + (dado1 + dado2));
+        //lblDado.setText("Dado: " + dado1 + " + " + dado2 + " = " + (dado1 + dado2));
         lblFichasMeta.setText("Fichas en meta: " + fichasMeta);
         lblMensaje.setText("Estado: " + mensaje);
 
@@ -78,7 +78,7 @@ public class PanelInfoLateral extends JPanel {
 
     private void actualizarModoOscuro(boolean modo) {
         setBackground(modo ? new Color(45, 45, 45) : new Color(240, 240, 240));
-        lblDado.setForeground(modo ? Color.WHITE : Color.BLACK);
+        //lblDado.setForeground(modo ? Color.WHITE : Color.BLACK);
         lblFichasMeta.setForeground(modo ? Color.WHITE : Color.BLACK);
         lblMensaje.setForeground(modo ? Color.LIGHT_GRAY : Color.DARK_GRAY);
 

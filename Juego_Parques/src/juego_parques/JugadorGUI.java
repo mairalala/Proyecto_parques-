@@ -20,7 +20,7 @@ public class JugadorGUI extends JPanel {
     private JuegoParquesGUI parent;
 
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
-                      ReproductorSonido reproductor, PanelInfoLateral panelInfo) {
+            ReproductorSonido reproductor, PanelInfoLateral panelInfo) {
         this.jugadores = jugadores;
         this.tablero = tablero;
         this.panelTablero = panelTablero;
@@ -44,8 +44,13 @@ public class JugadorGUI extends JPanel {
 
     private void lanzarDados() {
         Jugador jugador = jugadores[turnoActual];
-        int dado1 = random.nextInt(6) + 1;
-        int dado2 = random.nextInt(6) + 1;
+        Dado dado = new Dado();
+        int[] valores = dado.lanzar();
+        int dado1 = valores[0];
+        int dado2 = valores[1];
+        panelTablero.setDados(dado1, dado2);
+        panelTablero.repaint();
+
         boolean esPar = (dado1 == dado2);
         int total = dado1 + dado2;
 
@@ -98,9 +103,12 @@ public class JugadorGUI extends JPanel {
             panelTablero.actualizar();
         }
 
-        if (!esPar) siguienteTurno("Turno terminado");
-        else panelInfo.actualizarInfo(jugador.getNombre(), dado1, dado2, intentosIniciales,
-                jugador.getFichasEnMeta(), "Sacó par! Puede volver a lanzar.");
+        if (!esPar) {
+            siguienteTurno("Turno terminado");
+        } else {
+            panelInfo.actualizarInfo(jugador.getNombre(), dado1, dado2, intentosIniciales,
+                    jugador.getFichasEnMeta(), "Sacó par! Puede volver a lanzar.");
+        }
     }
 
     private void elegirFichaParaSacar(Jugador jugador) {
@@ -109,6 +117,8 @@ public class JugadorGUI extends JPanel {
                 .toArray();
 
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        new MensajeEmergente((JFrame) SwingUtilities.getWindowAncestor(this), "¡Sacaste ficha!");
+
 
         Object seleccion = JOptionPane.showInputDialog(
                 parentFrame,
