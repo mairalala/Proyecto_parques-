@@ -5,89 +5,96 @@ import java.awt.Point;
 
 public class Casilla {
 
-    private Point posicion; // Coordenadas (x, y) dentro del tablero
-    private String tipo;    // Tipo de casilla: normal, salida, seguro, pasillo, meta
-    private String color;   // Color asociado (solo aplica para casillas especiales)
+    private Point posicion;
+    private String tipo;
+    private String color;
+    private boolean preguntaRespondida = false;
+    private String categoria; // <-- NUEVO ATRIBUTO
 
-    // Constructor: crea una casilla con posición, tipo y color asociado
     public Casilla(Point pos, String tipo, String color) {
         this.posicion = pos;
         this.tipo = tipo;
         this.color = color;
     }
 
-    // Devuelve la posición de la casilla
     public Point getPosicion() {
         return posicion;
     }
 
-    // Devuelve el tipo de casilla
     public String getTipo() {
         return tipo;
     }
 
-    // Devuelve el color asociado (Rojo, Azul, etc.)
     public String getColor() {
         return color;
     }
 
-    // Cambia el tipo de la casilla
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
 
-    // Cambia el color de la casilla
     public void setColor(String color) {
         this.color = color;
     }
 
-    // Determina el color visual con el que se debe dibujar la casilla en pantalla
+    public boolean isSeguro() {
+        return "seguro".equals(tipo);
+    }
+
     public Color getDrawColor() {
+        if (tipo == null) {
+            return Color.WHITE;
+        }
 
-        // Casilla de salida usa color del jugador
-        if ("salida".equals(tipo)) {
+        if (tipo.equals("salida") || tipo.equals("pasillo")) {
             return getColorJugador();
-
-        // Casilla segura (no puede ser comida)
-        } else if ("seguro".equals(tipo)) {
+        } else if (tipo.equals("seguro")) {
             return new Color(0, 200, 200);
-
-        // Pasillo final hacia la meta, con color de jugador
-        } else if ("pasillo".equals(tipo)) {
-            return getColorJugador();
-
-        // Casilla de meta
-        } else if ("meeta".equals(tipo)) {
+        } else if (tipo.equals("meeta")) {
             return new Color(120, 230, 230);
-
-        // Cualquier otra casilla es blanca
+        } else if (tipo.equals("pregunta")) {
+            return Color.DARK_GRAY;
         } else {
             return Color.WHITE;
         }
     }
 
-    // Retorna el color asociado al jugador dueño de esta casilla especial
     private Color getColorJugador() {
         if (color == null) {
-            return Color.LIGHT_GRAY; // Si no tiene color, se usa gris por defecto
+            return Color.LIGHT_GRAY;
         }
 
-        switch (color) {
-            case "Rojo":
-                return new Color(255, 80, 80);
-            case "Azul":
-                return new Color(80, 80, 255);
-            case "Verde":
-                return new Color(80, 200, 80);
-            case "Amarillo":
-                return new Color(255, 220, 80);
-            default:
-                return Color.LIGHT_GRAY;
+        if (color.equals("Rojo")) {
+            return new Color(255, 80, 80);
+        } else if (color.equals("Azul")) {
+            return new Color(80, 80, 255);
+        } else if (color.equals("Verde")) {
+            return new Color(80, 200, 80);
+        } else if (color.equals("Amarillo")) {
+            return new Color(255, 220, 80);
+        } else {
+            return Color.LIGHT_GRAY;
         }
     }
 
-    // Indica si la casilla es segura (nadie puede ser comido aquí)
-    public boolean isSeguro() {
-        return "seguro".equals(tipo);
+    public boolean tienePreguntaRespondida() {
+        return preguntaRespondida;
+    }
+
+    public void setPreguntaRespondida(boolean val) {
+        preguntaRespondida = val;
+    }
+
+    public boolean isPreguntaRespondida() {
+        return preguntaRespondida;
+    }
+
+    // ------------------- NUEVOS MÉTODOS PARA CATEGORÍA -------------------
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 }

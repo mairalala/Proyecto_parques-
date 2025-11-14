@@ -16,8 +16,7 @@ public class Jugador {
         this.color = color;
         this.fichas = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            Ficha f = new Ficha(color);
-            f.setNumero(i + 1);
+            Ficha f = new Ficha(getColorStr(), i + 1);
             fichas.add(f);
         }
     }

@@ -44,7 +44,6 @@ public class TableroPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         Graphics2D g2d = (Graphics2D) g;
 
         int tableroSize = 20 * tamCasilla;
@@ -57,9 +56,12 @@ public class TableroPanel extends JPanel {
             int x = offsetX + p.x * tamCasilla;
             int y = offsetY + p.y * tamCasilla;
 
-            g2d.setColor(adaptarColor(c.getDrawColor()));
+            if ("pregunta".equals(c.getTipo())) {
+                g2d.setColor(Color.DARK_GRAY);
+            } else {
+                g2d.setColor(adaptarColor(c.getDrawColor()));
+            }
             g2d.fillRect(x, y, tamCasilla, tamCasilla);
-
             g2d.setColor(Color.BLACK);
             g2d.drawRect(x, y, tamCasilla, tamCasilla);
         }
@@ -73,7 +75,6 @@ public class TableroPanel extends JPanel {
 
                 g2d.setColor(adaptarColor(c.getDrawColor()));
                 g2d.fillRect(x, y, tamCasilla, tamCasilla);
-
                 g2d.setColor(Color.BLACK);
                 g2d.drawRect(x, y, tamCasilla, tamCasilla);
             }
@@ -89,9 +90,7 @@ public class TableroPanel extends JPanel {
         int fichaSize = tamCasilla - 10;
         for (Jugador jugador : jugadores) {
             for (Ficha ficha : jugador.getFichas()) {
-                if (ficha.isEnBase()) {
-                    continue;
-                }
+                if (ficha.isEnBase()) continue;
 
                 Point pos = ficha.getPosicion();
                 int fx = offsetX + pos.x * tamCasilla + 5;
@@ -112,10 +111,8 @@ public class TableroPanel extends JPanel {
                 String numStr = String.valueOf(ficha.getNumero());
                 g2d.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 15));
                 FontMetrics fm = g2d.getFontMetrics();
-
                 int textX = fx + (fichaSize - fm.stringWidth(numStr)) / 2;
                 int textY = fy + (fichaSize + fm.getAscent()) / 2 - 2;
-
                 g2d.drawString(numStr, textX, textY);
             }
         }
@@ -129,7 +126,6 @@ public class TableroPanel extends JPanel {
         int size = 50;
         g2d.setColor(Color.WHITE);
         g2d.fillRoundRect(x, y, size, size, 10, 10);
-
         g2d.setColor(Color.BLACK);
         g2d.drawRoundRect(x, y, size, size, 10, 10);
 
@@ -138,70 +134,48 @@ public class TableroPanel extends JPanel {
         int cy = y + size / 2;
 
         switch (valor) {
-            case 1:
-                
-                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+            case 1: g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot); break;
             case 2:
-                
-                 {
-                    g2d.fillOval(x + 10, y + 10, dot, dot);
-                    g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
-                }
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+                break;
             case 3:
-                
-                 {
-                    g2d.fillOval(x + 10, y + 10, dot, dot);
-                    g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
-                    g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
-                }
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+                break;
             case 4:
-                
-                 {
-                    g2d.fillOval(x + 10, y + 10, dot, dot);
-                    g2d.fillOval(x + size - 20, y + 10, dot, dot);
-                    g2d.fillOval(x + 10, y + size - 20, dot, dot);
-                    g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
-                }
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(x + size - 20, y + 10, dot, dot);
+                g2d.fillOval(x + 10, y + size - 20, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+                break;
             case 5:
-               
-                 {
-                    g2d.fillOval(x + 10, y + 10, dot, dot);
-                    g2d.fillOval(x + size - 20, y + 10, dot, dot);
-                    g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
-                    g2d.fillOval(x + 10, y + size - 20, dot, dot);
-                    g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
-                }
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(x + size - 20, y + 10, dot, dot);
+                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+                g2d.fillOval(x + 10, y + size - 20, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+                break;
             case 6:
-                
-                 {
-                    g2d.fillOval(x + 10, y + 10, dot, dot);
-                    g2d.fillOval(x + 10, y + size / 2 - dot / 2, dot, dot);
-                    g2d.fillOval(x + 10, y + size - 20, dot, dot);
-                    g2d.fillOval(x + size - 20, y + 10, dot, dot);
-                    g2d.fillOval(x + size - 20, y + size / 2 - dot / 2, dot, dot);
-                    g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
-                }
+                g2d.fillOval(x + 10, y + 10, dot, dot);
+                g2d.fillOval(x + 10, y + size / 2 - dot / 2, dot, dot);
+                g2d.fillOval(x + 10, y + size - 20, dot, dot);
+                g2d.fillOval(x + size - 20, y + 10, dot, dot);
+                g2d.fillOval(x + size - 20, y + size / 2 - dot / 2, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+                break;
         }
     }
 
     private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
         Color baseColor;
         switch (color) {
-            case "Rojo":
-                baseColor = new Color(255, 0, 0, 100);
-                break;
-            case "Amarillo":
-                baseColor = new Color(255, 255, 0, 100);
-                break;
-            case "Verde":
-                baseColor = new Color(0, 255, 0, 100);
-                break;
-            case "Azul":
-                baseColor = new Color(0, 0, 255, 100);
-                break;
-            default:
-                baseColor = new Color(200, 200, 200, 100);
-                break;
+            case "Rojo": baseColor = new Color(255, 0, 0, 100); break;
+            case "Amarillo": baseColor = new Color(255, 255, 0, 100); break;
+            case "Verde": baseColor = new Color(0, 255, 0, 100); break;
+            case "Azul": baseColor = new Color(0, 0, 255, 100); break;
+            default: baseColor = new Color(200, 200, 200, 100); break;
         }
 
         int baseSize = 7 * tamCasilla;
@@ -215,16 +189,12 @@ public class TableroPanel extends JPanel {
         int padding = (baseSize - 2 * fichaSize) / 3;
 
         for (Jugador jugador : jugadores) {
-            if (!jugador.getColorStr().equals(color)) {
-                continue;
-            }
+            if (!jugador.getColorStr().equals(color)) continue;
 
             List<Ficha> fichas = jugador.getFichas();
             for (int i = 0; i < fichas.size(); i++) {
                 Ficha f = fichas.get(i);
-                if (!f.isEnBase()) {
-                    continue;
-                }
+                if (!f.isEnBase()) continue;
 
                 int row = i / 2;
                 int col = i % 2;
@@ -247,9 +217,7 @@ public class TableroPanel extends JPanel {
     }
 
     private Color adaptarColor(Color colorOriginal) {
-        if (!modoOscuro) {
-            return colorOriginal;
-        }
+        if (!modoOscuro) return colorOriginal;
         int r = Math.max(0, colorOriginal.getRed() - 50);
         int g = Math.max(0, colorOriginal.getGreen() - 50);
         int b = Math.max(0, colorOriginal.getBlue() - 50);

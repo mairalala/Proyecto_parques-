@@ -2,14 +2,9 @@ package juego_parques;
 
 import javax.swing.*;
 import java.awt.*;
-import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
+import java.util.List;
+import java.util.Random;
 
-/**
- * Ventana principal del juego Parqués GUI. Aquí se integra el tablero, la barra
- * superior personalizada, los paneles laterales, control de turnos,
- * configuraciones y panel de pausa.
- */
 public class JuegoParquesGUI extends JFrame {
 
     private JPanel barraSuperior;
@@ -19,48 +14,35 @@ public class JuegoParquesGUI extends JFrame {
     private JugadorGUI controladorTurnos;
     private ReproductorSonido reproductor;
     private PanelInfoLateral panelInfo;
-    private PanelConfiguracion panelConfiguracion;
     private PanelPausa panelPausa;
     private boolean modoOscuro;
     private FondoPanel fondo;
+    private String categoriaPreguntas;
+    private PanelConfiguracion panelConfiguracion;
 
-    // ---------------- CONSTRUCTORES ----------------
-
+    // Constructor completo
     public JuegoParquesGUI(int cantidadJugadores, ReproductorSonido reproductor, boolean modoOscuro,
-                           String[] nombresJugadores, String[] coloresJugadores) {
+            String[] nombres, String[] colores) {
         this.reproductor = reproductor;
         this.modoOscuro = modoOscuro;
 
         inicializarBase(cantidadJugadores);
-        crearJugadoresPorDefecto(cantidadJugadores, nombresJugadores, coloresJugadores);
+        crearJugadoresPorDefecto(cantidadJugadores, nombres, colores);
         terminarInicializacion();
+        generarCasillasPregunta(); // Se generarán casillas de preguntas
     }
 
-    public JuegoParquesGUI(int cantidadJugadores, String[] nombresJugadores, Color[] coloresJugadores,
-                           ReproductorSonido reproductor, boolean modoOscuro) {
-        this.reproductor = reproductor;
-        this.modoOscuro = modoOscuro;
-
-        inicializarBase(cantidadJugadores);
-        crearJugadoresPersonalizados(cantidadJugadores, nombresJugadores, coloresJugadores);
-        terminarInicializacion();
-    }
-
-    // ---------------- INICIALIZACIÓN BASE ----------------
     private void inicializarBase(int cantidadJugadores) {
         setUndecorated(true);
         setLayout(new BorderLayout());
         crearBarraSuperior();
 
-        // Fondo según modo
         fondo = new FondoPanel("/juego_parques/imagenClaro.png",
-                               "/juego_parques/imagenOscuro.JPG",
-                               modoOscuro);
+                "/juego_parques/imagenOscuro.JPG", modoOscuro);
         fondo.setLayout(new BorderLayout());
         add(fondo, BorderLayout.CENTER);
 
         tablero = new Tablero();
-        tablero.setCantidadJugadores(cantidadJugadores);
     }
 
     private void crearJugadoresPorDefecto(int cantidadJugadores, String[] nombres, String[] colores) {
@@ -82,32 +64,15 @@ public class JuegoParquesGUI extends JFrame {
         }
     }
 
-    private void crearJugadoresPersonalizados(int cantidadJugadores, String[] nombres, Color[] colores) {
-        jugadores = new Jugador[cantidadJugadores];
-        for (int i = 0; i < cantidadJugadores; i++) {
-            String nombre = (nombres != null && i < nombres.length) ? nombres[i] : ("Jugador " + (i + 1));
-            Color color = (colores != null && i < colores.length) ? colores[i] : Color.RED;
-            jugadores[i] = new Jugador(nombre, color, tablero);
-
-            Point[] posBase = tablero.getPosicionesBase(jugadores[i].getColorStr());
-            for (int f = 0; f < jugadores[i].getFichas().size(); f++) {
-                Ficha ficha = jugadores[i].getFichas().get(f);
-                ficha.volverABase();
-                if (posBase != null && posBase.length > f) {
-                    ficha.setPosicion(posBase[f]);
-                }
-            }
-        }
-    }
-
     private Color obtenerColor(String c) {
+        if (c == null) return Color.WHITE;
         switch (c.toUpperCase()) {
             case "ROJO": return Color.RED;
             case "VERDE": return Color.GREEN;
             case "AZUL": return Color.BLUE;
             case "AMARILLO": return Color.YELLOW;
+            default: return Color.WHITE;
         }
-        return Color.WHITE;
     }
 
     private void terminarInicializacion() {
@@ -117,11 +82,11 @@ public class JuegoParquesGUI extends JFrame {
         panelInfo = new PanelInfoLateral(modoOscuro);
         fondo.add(panelInfo, BorderLayout.EAST);
 
-        controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero,
-                                          reproductor, panelInfo);
+        // Controlador de turnos, con categoría temporal
+        controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero, reproductor, panelInfo, categoriaPreguntas);
         fondo.add(controladorTurnos, BorderLayout.SOUTH);
 
-        // Panel de pausa overlay
+        // Panel de pausa
         panelPausa = new PanelPausa(this);
         panelPausa.setVisible(false);
         getLayeredPane().add(panelPausa, JLayeredPane.POPUP_LAYER);
@@ -131,7 +96,6 @@ public class JuegoParquesGUI extends JFrame {
         setVisible(true);
     }
 
-    // ---------------- BARRA SUPERIOR ----------------
     private void crearBarraSuperior() {
         barraSuperior = new JPanel();
         barraSuperior.setPreferredSize(new Dimension(1, 35));
@@ -163,7 +127,7 @@ public class JuegoParquesGUI extends JFrame {
         btn.setFont(new Font("Arial", Font.BOLD, 16));
     }
 
-    // ---------------- FUNCIONES ÚTILES ----------------
+    // ---------------- MÉTODOS PÚBLICOS ----------------
     public void setColorBarra(Color c) {
         barraSuperior.setBackground(c);
         barraSuperior.repaint();
@@ -179,18 +143,72 @@ public class JuegoParquesGUI extends JFrame {
         panelPausa.setVisible(false);
     }
 
+    public void setCategoriaPreguntas(String categoria) {
+        this.categoriaPreguntas = categoria;
+        if (controladorTurnos != null) {
+            controladorTurnos.setCategoriaSeleccionada(categoria);
+        }
+    }
+
+    public String getCategoriaPreguntas() {
+        return categoriaPreguntas;
+    }
+
+    public void cambiarTema(boolean modo) {
+        this.modoOscuro = modo;
+
+        if (fondo != null) {
+            fondo.setModoOscuro(modo);
+            fondo.repaint();
+        }
+        if (panelTablero != null) {
+            panelTablero.setModoOscuro(modo);
+            panelTablero.repaint();
+        }
+        if (panelInfo != null) {
+            panelInfo.setModoOscuro(modo);
+            panelInfo.repaint();
+        }
+        if (barraSuperior != null) {
+            barraSuperior.setBackground(modo ? Color.DARK_GRAY : new Color(180, 0, 0));
+            barraSuperior.repaint();
+        }
+    }
+
+    // ---------------- MÉTODO DE CASILLAS DE PREGUNTAS ----------------
+    private void generarCasillasPregunta() {
+        if (categoriaPreguntas == null || categoriaPreguntas.isEmpty()) {
+            categoriaPreguntas = "default";
+        }
+
+        Random rand = new Random();
+        int generadas = 0;
+        List<Casilla> casillas = tablero.getCasillas();
+
+        while (generadas < 6) {
+            int index = rand.nextInt(casillas.size());
+            Casilla c = casillas.get(index);
+            if ("normal".equals(c.getTipo()) && !c.isPreguntaRespondida()) {
+                c.setTipo("pregunta");
+                c.setCategoria(categoriaPreguntas); // <-- se asigna la categoría
+                generadas++;
+            }
+        }
+    }
+
     public void mostrarPanelConfiguracion() {
         if (panelConfiguracion == null) {
             panelConfiguracion = new PanelConfiguracion(this, reproductor, modoOscuro);
         }
+        panelConfiguracion.setLocationRelativeTo(this);
         panelConfiguracion.setVisible(true);
     }
 
     public ReproductorSonido getReproductor() {
-        return reproductor;
+        return this.reproductor;
     }
 
-    void cambiarTema(boolean selected) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void actualizarTablero() {
+        if (panelTablero != null) panelTablero.actualizar();
     }
 }

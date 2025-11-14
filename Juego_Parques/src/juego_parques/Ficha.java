@@ -2,137 +2,186 @@ package juego_parques;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.util.ArrayList;
 
-/**
- * Representa una ficha del jugador dentro del juego de Parqués.
- * Cada ficha tiene un color, un estado (en base, en ruta o en meta)
- * y una posición dentro del tablero.
- */
 public class Ficha {
 
-    private Color color;            // Color real de la ficha (objeto Color)
-    private String colorStr;        // Color en texto (Rojo, Azul, etc.)
-    private int numero;             // Número identificador de la ficha (1,2,3,4)
-    private boolean enBase = true;  // Indica si la ficha sigue en la base
-    private boolean haLlegadoAMeta = false; // Indica si ya llegó a la meta
-    private Point posicion;         // Posición gráfica actual en el tablero
-    private int indiceCasilla = -1; // Índice de la casilla en el recorrido del tablero
+    private String colorStr;
+    private Color color; // nuevo campo
+    private int numero;
+    private Point posicion;
+    private int indiceCasilla = 0; // índice en ruta principal
+    private int indiceCasillaPasillo = -1; // índice en pasillo (-1 si no está)
+    private boolean enBase = true;
+    private boolean enMeta = false;
+    private boolean haDadoVuelta = false; // NUEVO: controla si completó la vuelta
 
-    /**
-     * Constructor: crea una ficha con un color.
-     * También asigna el nombre del color como texto.
-     */
-    public Ficha(Color color) {
-        this.color = color;
-        this.colorStr = asignarColorStr(color);
+    public Ficha(String colorStr, int numero) {
+        this.colorStr = colorStr;
+        this.numero = numero;
+
+        switch (colorStr) {
+            case "Rojo":
+                this.color = Color.RED;
+                break;
+            case "Amarillo":
+                this.color = Color.YELLOW;
+                break;
+            case "Verde":
+                this.color = Color.GREEN;
+                break;
+            case "Azul":
+                this.color = Color.BLUE;
+                break;
+            default:
+                this.color = Color.GRAY;
+                break;
+        }
     }
 
-    /**
-     * Convierte un objeto Color en un nombre de color en texto.
-     */
-    private String asignarColorStr(Color color) {
-        if (color.equals(Color.RED)) return "Rojo";
-        if (color.equals(Color.YELLOW)) return "Amarillo";
-        if (color.equals(Color.GREEN)) return "Verde";
-        if (color.equals(Color.BLUE)) return "Azul";
-        return "Desconocido";
+    public Color getColor() {
+        return color;
     }
 
-    // === Getters y setters básicos ===
-    public Color getColor() { return color; }
-    public String getColorStr() { return colorStr; }
-    public int getNumero() { return numero; }
-    public void setNumero(int numero) { this.numero = numero; }
-    public boolean isEnBase() { return enBase; }
-    public boolean haLlegadoAMeta() { return haLlegadoAMeta; }
-    public Point getPosicion() { return posicion; }
-    public void setPosicion(Point p) { this.posicion = p; }
-
-    /**
-     * Saca la ficha de la base y la coloca en la casilla de salida del tablero.
-     * @param salidaIndex índice de casilla donde empieza su recorrido.
-     */
-    public void sacarDeBase(int salidaIndex, Tablero tablero) {
-        this.enBase = false;
-        this.indiceCasilla = salidaIndex;
-        this.posicion = tablero.obtenerCasilla(salidaIndex);
-    }
-
-    /**
-     * Regresa la ficha a la base (por ejemplo, cuando es comida).
-     */
     public void volverABase() {
-        this.enBase = true;
-        this.haLlegadoAMeta = false;
-        this.indiceCasilla = -1;
-        this.posicion = null;
+        enBase = true;
+        enMeta = false;
+        indiceCasilla = 0;
+        indiceCasillaPasillo = -1;
+        haDadoVuelta = false; // Reinicia vuelta
     }
 
-    /**
-     * Mueve la ficha una cantidad de pasos dentro del tablero.
-     * También detecta si entra al pasillo final o si llega a la meta.
-     */
+    public void sacarDeBase(int salidaIndex, Tablero tablero) {
+        enBase = false;
+        enMeta = false;
+        indiceCasilla = salidaIndex;
+        indiceCasillaPasillo = -1;
+        haDadoVuelta = false;
+        posicion = tablero.obtenerCasilla(salidaIndex);
+    }
+
+    public boolean isEnBase() {
+        return enBase;
+    }
+
+    public boolean isEnMeta() {
+        return enMeta;
+    }
+
+    public void setEnMeta(boolean val) {
+        enMeta = val;
+    }
+
+    public Point getPosicion() {
+        return posicion;
+    }
+
+    public void setPosicion(Point p) {
+        this.posicion = p;
+    }
+
+    public String getColorStr() {
+        return colorStr;
+    }
+
+    public int getNumero() {
+        return numero;
+    }
+
+    public int getIndiceCasilla() {
+        return indiceCasilla;
+    }
+
+    public void setIndiceCasilla(int idx) {
+        this.indiceCasilla = idx;
+    }
+
+    public int getIndiceCasillaPasillo() {
+        return indiceCasillaPasillo;
+    }
+
+    public void setIndiceCasillaPasillo(int idx) {
+        this.indiceCasillaPasillo = idx;
+    }
+
+    public boolean estaEnPasillo() {
+        return indiceCasilla == -1;
+    }
+
+    public boolean haDadoVuelta() {
+        return haDadoVuelta;
+    }
+
+    public void resetVuelta() {
+        haDadoVuelta = false;
+    }
+
+    public boolean puedeEntrarPasillo(Tablero tablero) {
+        if (enBase || enMeta) {
+            return false;
+        }
+
+        // Solo puede entrar si ya dio la vuelta completa
+        if (!haDadoVuelta) return false;
+
+        switch (colorStr) {
+            case "Rojo":
+                return indiceCasilla == 62;
+            case "Amarillo":
+                return indiceCasilla == 16;
+            case "Verde":
+                return indiceCasilla == 28;
+            case "Azul":
+                return indiceCasilla == 50;
+            default:
+                return false;
+        }
+    }
+
     public void mover(int pasos, Tablero tablero) {
+        int totalCasillas = tablero.getCasillas().size();
 
-        // No se mueve si sigue en base o ya está en meta
-        if (enBase || haLlegadoAMeta) return;
+        for (int i = 0; i < pasos; i++) {
+            if (!enBase && !enMeta) {
+                // Detectar si completó la vuelta
+                if (indiceCasilla + 1 >= totalCasillas) {
+                    indiceCasilla = 0;
+                    haDadoVuelta = true;
+                } else {
+                    indiceCasilla++;
+                }
 
-        int rutaSize = tablero.getCasillas().size();
-        int nuevoIndice = indiceCasilla + pasos;
+                // Actualizar posición normal
+                posicion = tablero.obtenerCasilla(indiceCasilla);
 
-        // Revisa paso por paso si entra al pasillo final
-        for (int i = indiceCasilla + 1; i <= nuevoIndice; i++) {
-            if (i < rutaSize) {
-
-                Casilla c = tablero.getCasillas().get(i);
-
-                // Si la casilla es la entrada al pasillo final del color de esta ficha
-                if ("salida".equals(c.getTipo()) && colorStr.equals(c.getColor())) {
-
-                    // Calcula cuántos pasos aún faltan por avanzar
-                    int pasosRestantes = nuevoIndice - i;
-
-                    // Avanza dentro del pasillo
-                    int indexPasillo = 0;
-                    for (Casilla pasillo : tablero.getPasillos().get(colorStr)) {
-                        if (indexPasillo < pasosRestantes) {
-                            posicion = pasillo.getPosicion();
-                            indexPasillo++;
-                        } else break;
+                // Verificar entrada al pasillo
+                if (puedeEntrarPasillo(tablero)) {
+                    indiceCasilla = -1;
+                    indiceCasillaPasillo = 0;
+                    ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
+                    if (pasillo != null && !pasillo.isEmpty()) {
+                        posicion = pasillo.get(0).getPosicion();
                     }
+                }
 
-                    // Revisa si llegó a la meta
-                    if (posicion.equals(tablero.getMetaPorColor(colorStr)))
-                        haLlegadoAMeta = true;
+            } else if (estaEnPasillo()) {
+                ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
+                if (pasillo == null || pasillo.isEmpty()) return;
 
-                    // Se marca como fuera del recorrido principal
-                    indiceCasilla = rutaSize;
-                    return;
+                int prox = indiceCasillaPasillo + 1;
+                if (prox < pasillo.size()) {
+                    indiceCasillaPasillo = prox;
+                    posicion = pasillo.get(prox).getPosicion();
+                } else {
+                    enMeta = true;
+                    posicion = tablero.getMetaPorColor(colorStr);
                 }
             }
         }
-
-        // Evita salir fuera del rango del tablero
-        if (nuevoIndice >= rutaSize) nuevoIndice = rutaSize - 1;
-
-        // Actualiza posición normal dentro del tablero
-        indiceCasilla = nuevoIndice;
-        posicion = tablero.obtenerCasilla(indiceCasilla);
     }
 
-    /**
-     * Mueve la ficha animando el recorrido, paso por paso.
-     * Esto permite ver el movimiento fluido en pantalla.
-     */
-    public void moverConAnimacion(int pasos, Tablero tablero, TableroPanel panel) {
-        new Thread(() -> {
-            for (int i = 0; i < pasos; i++) {
-                mover(1, tablero);              // Mueve la ficha un paso
-                panel.setFichaActiva(this);     // Marca qué ficha se está moviendo
-                panel.repaint();                // Redibuja el tablero
-                try { Thread.sleep(300); }       // Pausa para la animación
-                catch (InterruptedException e) { e.printStackTrace(); }
-            }
-        }).start();
+    public boolean haLlegadoAMeta() {
+        return enMeta;
     }
+
 }

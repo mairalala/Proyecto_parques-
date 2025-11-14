@@ -5,36 +5,26 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-/**
- * Ventana principal del menú inicial del juego Parqués GUI.
- * Incluye fondo claro/oscuro, efectos hover, paneles emergentes,
- * música y navegación a la pantalla del juego.
- */
 public class MenuInicial extends JFrame {
 
-    private FondoPanel fondo;                // Panel que muestra la imagen de fondo
-    private ReproductorSonido reproductorGlobal; // Maneja toda la música del juego
-    private boolean modoOscuro = false;      // Indica si el menú está en modo oscuro
+    private FondoPanel fondo;
+    private ReproductorSonido reproductorGlobal;
+    private boolean modoOscuro = false;
 
     public MenuInicial(ReproductorSonido reproductorGlobal) {
         this.reproductorGlobal = reproductorGlobal;
-        initMenu(); // Inicializa toda la UI
+        initMenu();
     }
 
-    /**
-     * Inicializa el menú principal y todos sus elementos gráficos.
-     */
     private void initMenu() {
         setTitle("Parqués GUI - Menú Principal");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setUndecorated(true); // Quita bordes y barra del sistema
+        setUndecorated(true);
 
-        // Obtiene el espacio total útil del sistema (sin la barra de tareas)
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         Rectangle bounds = env.getMaximumWindowBounds();
         setBounds(bounds);
 
-        // Crea el fondo dependiendo si está en modo oscuro o claro
         fondo = new FondoPanel(
                 "/juego_parques/fondo_claro.png",
                 "/juego_parques/fondo_oscuro.png",
@@ -43,18 +33,15 @@ public class MenuInicial extends JFrame {
         fondo.setLayout(new BorderLayout());
         setContentPane(fondo);
 
-        // Inicia música de fondo si no está sonando
         if (!reproductorGlobal.estaReproduciendoFondo()) {
             reproductorGlobal.reproducirMusicaFondo("fondo.wav");
         }
 
-        // Panel central transparente
         JPanel panelCentral = new JPanel();
         panelCentral.setOpaque(false);
         panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.Y_AXIS));
         panelCentral.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
 
-        // Panel del título
         JPanel panelTitulo = new JPanel(new BorderLayout());
         panelTitulo.setOpaque(false);
         panelTitulo.setPreferredSize(new Dimension(0, 200));
@@ -63,25 +50,10 @@ public class MenuInicial extends JFrame {
         titulo.setFont(new Font("Segoe UI Emoji", Font.BOLD, 70));
         titulo.setForeground(Color.WHITE);
 
-        titulo.setUI(new javax.swing.plaf.basic.BasicLabelUI() {
-            @Override
-            public void paint(Graphics g, JComponent c) {
-                Graphics2D g2d = (Graphics2D) g.create();
-                g2d.setColor(Color.GRAY);
-                FontMetrics fm = g2d.getFontMetrics();
-                int x = (c.getWidth() - fm.stringWidth(titulo.getText())) / 2;
-                int y = fm.getAscent() + 10;
-                g2d.drawString(titulo.getText(), x + 4, y + 200);
-                g2d.dispose();
-                super.paint(g, c);
-            }
-        });
-
         panelTitulo.add(titulo, BorderLayout.CENTER);
         panelCentral.add(panelTitulo);
         panelCentral.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        // Botones principales
         JButton btnJugar = crearBoton("🟢 JUGAR", new Color(0, 150, 0));
         JButton btnCreditos = crearBoton("💫 CRÉDITOS", new Color(0, 102, 204));
         JButton btnConfig = crearBoton("⚙ CONFIGURACIÓN", new Color(102, 102, 102));
@@ -106,20 +78,37 @@ public class MenuInicial extends JFrame {
         // ACCIÓN DEL BOTÓN JUGAR
         // -------------------------
         btnJugar.addActionListener(e -> {
-            // Abrir panel propio para seleccionar cantidad de jugadores
-            PanelSeleccionCantidadJugadores panelSeleccion = new PanelSeleccionCantidadJugadores(this);
-            int cantJugadores = panelSeleccion.getCantidadSeleccionada();
-            if (cantJugadores == 0) return; // No seleccionó
+            // Crear diálogo de selección de categoría
+            SeleccionCategoria dialogCategoria = new SeleccionCategoria(this);
+            dialogCategoria.setVisible(true); // Modal, espera a que se cierre
 
-            // Abrir panel para nombres y colores
-            PanelSeleccionJugadores panel = new PanelSeleccionJugadores(this, cantJugadores);
-            if (!panel.fueConfirmado()) return;
+            // Obtener la categoría seleccionada
+            String categoria = dialogCategoria.getCategoriaSeleccionada();
+            if (categoria == null || categoria.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar una categoría", "Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-            String[] nombres = panel.getNombres();
-            String[] colores = panel.getColores();
+            // Continuar con selección de cantidad de jugadores
+            PanelSeleccionCantidadJugadores panelCantidad = new PanelSeleccionCantidadJugadores(this);
+            int cantJugadores = panelCantidad.getCantidadSeleccionada();
+            if (cantJugadores < 2) {
+                return;
+            }
 
-            // Lanza el juego
-            new JuegoParquesGUI(cantJugadores, reproductorGlobal, modoOscuro, nombres, colores);
+            // Selección de nombres y colores
+            PanelSeleccionJugadores panelJugadores = new PanelSeleccionJugadores(this, cantJugadores);
+            if (!panelJugadores.fueConfirmado()) {
+                return;
+            }
+
+            String[] nombres = panelJugadores.getNombres();
+            String[] colores = panelJugadores.getColores();
+
+            // Iniciar el juego
+            JuegoParquesGUI juego = new JuegoParquesGUI(cantJugadores, reproductorGlobal, modoOscuro, nombres, colores);
+            juego.setCategoriaPreguntas(categoria);
+
             dispose();
         });
 
@@ -127,7 +116,6 @@ public class MenuInicial extends JFrame {
         btnConfig.addActionListener(e -> mostrarPanelFlotante(configuracionPanel()));
         btnSalir.addActionListener(e -> System.exit(0));
 
-        // Añadir botones al panel central
         for (JButton b : botones) {
             panelCentral.add(b);
             panelCentral.add(Box.createRigidArea(new Dimension(0, 20)));
