@@ -5,27 +5,36 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/**
+ * Ventana principal del menú inicial del juego Parqués GUI. Incluye fondo
+ * claro/oscuro, efectos hover, paneles emergentes, música, y navegación a la
+ * pantalla del juego.
+ */
 public class MenuInicial extends JFrame {
 
-    private FondoPanel fondo;
-    private ReproductorSonido reproductorGlobal;
-    private boolean modoOscuro = false;
+    private FondoPanel fondo;                // Panel que muestra la imagen de fondo
+    private ReproductorSonido reproductorGlobal; // Maneja toda la música del juego
+    private boolean modoOscuro = false;      // Indica si el menú está en modo oscuro
 
     public MenuInicial(ReproductorSonido reproductorGlobal) {
         this.reproductorGlobal = reproductorGlobal;
-        initMenu();
+        initMenu(); // Inicializa toda la UI
     }
 
+    /**
+     * Inicializa el menú principal y todos sus elementos gráficos.
+     */
     private void initMenu() {
         setTitle("Parqués GUI - Menú Principal");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setUndecorated(true);
+        setUndecorated(true); // Quita bordes y barra del sistema
 
+        // Obtiene el espacio total útil del sistema (sin la barra de tareas)
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         Rectangle bounds = env.getMaximumWindowBounds();
         setBounds(bounds);
 
-        // Fondo con modo claro/oscuro
+        // Crea el fondo dependiendo si está en modo oscuro o claro
         fondo = new FondoPanel(
                 "/juego_parques/fondo_claro.png",
                 "/juego_parques/fondo_oscuro.png",
@@ -34,76 +43,87 @@ public class MenuInicial extends JFrame {
         fondo.setLayout(new BorderLayout());
         setContentPane(fondo);
 
-        // Música de fondo
+        // Inicia música de fondo si no está sonando
         if (!reproductorGlobal.estaReproduciendoFondo()) {
             reproductorGlobal.reproducirMusicaFondo("fondo.wav");
         }
 
-        // Panel central transparente
+        // Panel transparente que contendrá el título y los botones
         JPanel panelCentral = new JPanel();
         panelCentral.setOpaque(false);
         panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.Y_AXIS));
         panelCentral.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
 
-        // PANEL DEL TÍTULO MÁS GRANDE
+        // Panel del título grande
         JPanel panelTitulo = new JPanel(new BorderLayout());
         panelTitulo.setOpaque(false);
-        panelTitulo.setPreferredSize(new Dimension(0, 200)); // altura mayor para que los dados no se corten
+        panelTitulo.setPreferredSize(new Dimension(0, 200)); // Más altura para el título
 
-        // Título con sombra
+        // Texto del título
         JLabel titulo = new JLabel("🎲 PARQUÉS GUI 🎲", SwingConstants.CENTER);
         titulo.setFont(new Font("Segoe UI Emoji", Font.BOLD, 70));
         titulo.setForeground(Color.WHITE);
 
-        // Sombra del título
+        // Sombra personalizada detrás del título
         titulo.setUI(new javax.swing.plaf.basic.BasicLabelUI() {
             @Override
             public void paint(Graphics g, JComponent c) {
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setColor(Color.GRAY);
-                g2d.setFont(titulo.getFont());
+
                 FontMetrics fm = g2d.getFontMetrics();
                 int x = (c.getWidth() - fm.stringWidth(titulo.getText())) / 2;
-                int y = fm.getAscent() + 10; // sombra centrada
-                g2d.drawString(titulo.getText(), x + 4, y + 200); // desplazamiento para sombra
+                int y = fm.getAscent() + 10;
+
+                // Dibuja sombra desplazada
+                g2d.drawString(titulo.getText(), x + 4, y + 200);
                 g2d.dispose();
+
+                // Dibuja el texto normalmente
                 super.paint(g, c);
             }
         });
 
         panelTitulo.add(titulo, BorderLayout.CENTER);
         panelCentral.add(panelTitulo);
-        panelCentral.add(Box.createRigidArea(new Dimension(0, 50))); // espacio debajo del título
+        panelCentral.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        // Botones con estilo moderno y efecto hover
+        // Crea botones principales con estilo
         JButton btnJugar = crearBoton("🟢 JUGAR", new Color(0, 150, 0));
         JButton btnCreditos = crearBoton("💫 CRÉDITOS", new Color(0, 102, 204));
         JButton btnConfig = crearBoton("⚙ CONFIGURACIÓN", new Color(102, 102, 102));
         JButton btnSalir = crearBoton("❌ SALIR", new Color(200, 0, 0));
 
-        // Efecto hover
+        // Lista de los botones para aplicar efectos hover
         JButton[] botones = {btnJugar, btnCreditos, btnConfig, btnSalir};
+
         for (JButton b : botones) {
             b.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    b.setBackground(b.getBackground().brighter());
+                    b.setBackground(b.getBackground().brighter()); // Ilumina el botón
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    b.setBackground(b.getBackground().darker());
+                    b.setBackground(b.getBackground().darker()); // Oscurece al salir
                 }
             });
         }
 
-        // Acciones de los botones
+        // Acciones del botón Jugar
         btnJugar.addActionListener(e -> {
             String[] opciones = {"2 Jugadores", "3 Jugadores", "4 Jugadores"};
-            int seleccion = JOptionPane.showOptionDialog(this,
-                    "Elige cantidad de jugadores:", "Seleccionar jugadores",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                    null, opciones, opciones[1]);
+            int seleccion = JOptionPane.showOptionDialog(
+                    this,
+                    "Elige cantidad de jugadores:",
+                    "Seleccionar jugadores",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    opciones,
+                    opciones[1]
+            );
 
             int cantJugadores;
             switch (seleccion) {
@@ -120,15 +140,19 @@ public class MenuInicial extends JFrame {
                     cantJugadores = 2;
             }
 
+            // Lanza el juego y cierra el menú
             new JuegoParquesGUI(cantJugadores, reproductorGlobal, modoOscuro);
             dispose();
         });
 
+        // Botones que abren paneles emergentes
         btnCreditos.addActionListener(e -> mostrarPanelFlotante(creditosPanel()));
         btnConfig.addActionListener(e -> mostrarPanelFlotante(configuracionPanel()));
+
+        // Botón salir
         btnSalir.addActionListener(e -> System.exit(0));
 
-        // Separadores y añadir botones al panel central
+        // Agrega cada botón con un separador
         for (JButton b : botones) {
             panelCentral.add(b);
             panelCentral.add(Box.createRigidArea(new Dimension(0, 20)));
@@ -138,11 +162,14 @@ public class MenuInicial extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Crea un botón estilizado con color, tamaño y fuente personalizados.
+     */
     private JButton crearBoton(String texto, Color color) {
         JButton b = new JButton(texto);
         b.setFont(new Font("Arial", Font.BOLD, 24));
         b.setFocusPainted(false);
-        b.setBackground(color.darker());
+        b.setBackground(color.darker()); // Color base
         b.setForeground(Color.WHITE);
         b.setAlignmentX(Component.CENTER_ALIGNMENT);
         b.setMaximumSize(new Dimension(350, 60));
@@ -151,13 +178,18 @@ public class MenuInicial extends JFrame {
         return b;
     }
 
+    /**
+     * Cambia entre modo claro y oscuro del fondo.
+     */
     public void setModoOscuro(boolean modo) {
         this.modoOscuro = modo;
         fondo.setModoOscuro(modo);
         repaint();
     }
 
-    // ------------------- Panel de Créditos -------------------
+    /**
+     * Panel flotante: Panel de créditos
+     */
     private JPanel creditosPanel() {
         JPanel panel = new JPanel();
         panel.setOpaque(false);
@@ -184,7 +216,6 @@ public class MenuInicial extends JFrame {
         btnCerrar.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnCerrar.setBackground(new Color(200, 0, 0));
         btnCerrar.setForeground(Color.WHITE);
-        btnCerrar.setFocusPainted(false);
         btnCerrar.setMaximumSize(new Dimension(160, 45));
         btnCerrar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
 
@@ -197,13 +228,16 @@ public class MenuInicial extends JFrame {
         return panel;
     }
 
-    // ------------------- Panel de Configuración -------------------
+    /**
+     * Panel flotante: Configuración general del menú
+     */
     private JPanel configuracionPanel() {
         JPanel panel = new JPanel();
         panel.setOpaque(false);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // Título
         JLabel titulo = new JLabel("⚙ Configuración", SwingConstants.CENTER);
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titulo.setForeground(Color.WHITE);
@@ -211,6 +245,7 @@ public class MenuInicial extends JFrame {
         panel.add(titulo);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
 
+        // Checkbox del modo oscuro
         JCheckBox chkModoOscuro = new JCheckBox("Modo oscuro", modoOscuro);
         chkModoOscuro.setForeground(Color.WHITE);
         chkModoOscuro.setOpaque(false);
@@ -218,6 +253,7 @@ public class MenuInicial extends JFrame {
         panel.add(chkModoOscuro);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
 
+        // Control de volumen
         JLabel lblMusica = new JLabel("Volumen de música:");
         lblMusica.setForeground(Color.WHITE);
         panel.add(lblMusica);
@@ -226,11 +262,13 @@ public class MenuInicial extends JFrame {
         sliderMusica.setMajorTickSpacing(25);
         sliderMusica.setPaintTicks(true);
         sliderMusica.setPaintLabels(true);
-        sliderMusica.addChangeListener(e
-                -> reproductorGlobal.ajustarVolumenMusica(sliderMusica.getValue() / 100f));
+        sliderMusica.addChangeListener(
+                e -> reproductorGlobal.ajustarVolumenMusica(sliderMusica.getValue() / 100f)
+        );
         panel.add(sliderMusica);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
 
+        // Botón cerrar
         JButton btnCerrar = new JButton("Cerrar");
         btnCerrar.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnCerrar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
@@ -239,7 +277,9 @@ public class MenuInicial extends JFrame {
         return panel;
     }
 
-    // ------------------- Mostrar panel flotante -------------------
+    /**
+     * Muestra un panel emergente con fondo oscurecido.
+     */
     public void mostrarPanelFlotante(JPanel panelContenido) {
         JDialog dialog = new JDialog(this, true);
         dialog.setUndecorated(true);
@@ -247,6 +287,7 @@ public class MenuInicial extends JFrame {
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
+        // Fondo oscuro semitransparente
         JPanel fondoDialog = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -256,8 +297,10 @@ public class MenuInicial extends JFrame {
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
             }
         };
+
         fondoDialog.setLayout(new GridBagLayout());
         fondoDialog.add(panelContenido);
+
         dialog.add(fondoDialog, BorderLayout.CENTER);
         dialog.setVisible(true);
     }
