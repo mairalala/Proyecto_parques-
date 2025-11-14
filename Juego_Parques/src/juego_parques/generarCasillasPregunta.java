@@ -4,10 +4,12 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
 
 public class generarCasillasPregunta {
 
-    private String pregunta;
+     private String pregunta;
     private String respuestaCorrecta;
     private String categoria;
     private String dificultad;
@@ -29,7 +31,7 @@ public class generarCasillasPregunta {
     private static final List<String[]> PREGUNTAS_MATEMATICAS_MEDIO = new ArrayList<>();
     private static final List<String[]> PREGUNTAS_MATEMATICAS_AVANZADO = new ArrayList<>();
 
-    private static final List<String[]> preguntasUsadas = new ArrayList<>();
+    private static final Map<String, List<String[]>> preguntasUsadas = new HashMap<>();
 
     static {
         // ------------------- Programación Java -------------------
@@ -298,72 +300,80 @@ public class generarCasillasPregunta {
     }
 
     private void generarPregunta() {
-        Random rand = new Random();
-        List<String[]> listaPreguntas = new ArrayList<>();
+        List<String[]> listaPreguntas = obtenerListaPorCategoriaYNivel(categoria, dificultad);
 
-        switch (categoria) {
-            case "Programación Java básica":
-                if ("Fácil".equalsIgnoreCase(dificultad)) {
-                    listaPreguntas = PREGUNTAS_PROGRAMACION_FACIL;
-                } else if ("Medio".equalsIgnoreCase(dificultad)) {
-                    listaPreguntas = PREGUNTAS_PROGRAMACION_MEDIO;
-                } else {
-                    listaPreguntas = PREGUNTAS_PROGRAMACION_AVANZADO;
-                }
-                break;
-
-            case "Inglés básico":
-                if ("Fácil".equalsIgnoreCase(dificultad)) {
-                    listaPreguntas = PREGUNTAS_INGLES_FACIL;
-                } else if ("Medio".equalsIgnoreCase(dificultad)) {
-                    listaPreguntas = PREGUNTAS_INGLES_MEDIO;
-                } else {
-                    listaPreguntas = PREGUNTAS_INGLES_AVANZADO;
-                }
-                break;
-
-            case "Historia de la computación":
-                if ("Fácil".equalsIgnoreCase(dificultad)) {
-                    listaPreguntas = PREGUNTAS_HISTORIA_FACIL;
-                } else if ("Medio".equalsIgnoreCase(dificultad)) {
-                    listaPreguntas = PREGUNTAS_HISTORIA_MEDIO;
-                } else {
-                    listaPreguntas = PREGUNTAS_HISTORIA_AVANZADO;
-                }
-                break;
-
-            default:
-                pregunta = "Error: categoría no definida";
-                respuestaCorrecta = "";
-                return;
+        if (listaPreguntas.isEmpty()) {
+            pregunta = "Error: categoría no definida";
+            respuestaCorrecta = "";
+            return;
         }
+
+        // Inicializar lista de preguntas usadas si no existe
+        String key = categoria + "_" + dificultad;
+        preguntasUsadas.putIfAbsent(key, new ArrayList<>());
 
         List<String[]> disponibles = new ArrayList<>();
         for (String[] p : listaPreguntas) {
-            if (!preguntasUsadas.contains(p)) {
+            if (!preguntasUsadas.get(key).contains(p)) {
                 disponibles.add(p);
             }
         }
 
         if (disponibles.isEmpty()) {
-            preguntasUsadas.removeIf(listaPreguntas::contains);
+            // Reinicia si ya se usaron todas
+            preguntasUsadas.get(key).clear();
             disponibles.addAll(listaPreguntas);
         }
 
+        Random rand = new Random();
         int idx = rand.nextInt(disponibles.size());
         String[] seleccion = disponibles.get(idx);
+
         pregunta = seleccion[0];
         respuestaCorrecta = seleccion[1];
-        preguntasUsadas.add(seleccion);
+        preguntasUsadas.get(key).add(seleccion);
     }
 
-    public boolean hacerPregunta() {
-        String input = JOptionPane.showInputDialog(null, pregunta,
-                "Pregunta - " + categoria + " (" + dificultad + ")",
-                JOptionPane.QUESTION_MESSAGE);
-        if (input == null) {
-            return false;
+    private List<String[]> obtenerListaPorCategoriaYNivel(String categoria, String dificultad) {
+        switch (categoria) {
+            case "Programación Java básica":
+                switch (dificultad.toLowerCase()) {
+                    case "fácil": return PREGUNTAS_PROGRAMACION_FACIL;
+                    case "medio": return PREGUNTAS_PROGRAMACION_MEDIO;
+                    default: return PREGUNTAS_PROGRAMACION_AVANZADO;
+                }
+            case "Inglés básico":
+                switch (dificultad.toLowerCase()) {
+                    case "fácil": return PREGUNTAS_INGLES_FACIL;
+                    case "medio": return PREGUNTAS_INGLES_MEDIO;
+                    default: return PREGUNTAS_INGLES_AVANZADO;
+                }
+            case "Historia de la computación":
+                switch (dificultad.toLowerCase()) {
+                    case "fácil": return PREGUNTAS_HISTORIA_FACIL;
+                    case "medio": return PREGUNTAS_HISTORIA_MEDIO;
+                    default: return PREGUNTAS_HISTORIA_AVANZADO;
+                }
+            case "Matemáticas":
+                switch (dificultad.toLowerCase()) {
+                    case "fácil": return PREGUNTAS_MATEMATICAS_FACIL;
+                    case "medio": return PREGUNTAS_MATEMATICAS_MEDIO;
+                    default: return PREGUNTAS_MATEMATICAS_AVANZADO;
+                }
+            default:
+                return new ArrayList<>();
         }
+    }
+
+    // ------------------- Método para hacer la pregunta -------------------
+    public boolean hacerPregunta() {
+        String input = JOptionPane.showInputDialog(
+                null,
+                pregunta,
+                "Pregunta - " + categoria + " (" + dificultad + ")",
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (input == null) return false;
         return input.trim().equalsIgnoreCase(respuestaCorrecta);
     }
 

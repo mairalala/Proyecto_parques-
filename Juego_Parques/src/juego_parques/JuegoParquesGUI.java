@@ -20,7 +20,6 @@ public class JuegoParquesGUI extends JFrame {
     private String categoriaPreguntas;
     private PanelConfiguracion panelConfiguracion;
 
-    // Constructor completo
     public JuegoParquesGUI(int cantidadJugadores, ReproductorSonido reproductor, boolean modoOscuro,
             String[] nombres, String[] colores) {
         this.reproductor = reproductor;
@@ -29,7 +28,7 @@ public class JuegoParquesGUI extends JFrame {
         inicializarBase(cantidadJugadores);
         crearJugadoresPorDefecto(cantidadJugadores, nombres, colores);
         terminarInicializacion();
-        generarCasillasPregunta(); // Se generarán casillas de preguntas
+        generarCasillasPregunta(); 
     }
 
     private void inicializarBase(int cantidadJugadores) {
@@ -82,11 +81,9 @@ public class JuegoParquesGUI extends JFrame {
         panelInfo = new PanelInfoLateral(modoOscuro);
         fondo.add(panelInfo, BorderLayout.EAST);
 
-        // Controlador de turnos, con categoría temporal
         controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero, reproductor, panelInfo, categoriaPreguntas);
         fondo.add(controladorTurnos, BorderLayout.SOUTH);
 
-        // Panel de pausa
         panelPausa = new PanelPausa(this);
         panelPausa.setVisible(false);
         getLayeredPane().add(panelPausa, JLayeredPane.POPUP_LAYER);
@@ -127,7 +124,6 @@ public class JuegoParquesGUI extends JFrame {
         btn.setFont(new Font("Arial", Font.BOLD, 16));
     }
 
-    // ---------------- MÉTODOS PÚBLICOS ----------------
     public void setColorBarra(Color c) {
         barraSuperior.setBackground(c);
         barraSuperior.repaint();
@@ -175,7 +171,6 @@ public class JuegoParquesGUI extends JFrame {
         }
     }
 
-    // ---------------- MÉTODO DE CASILLAS DE PREGUNTAS ----------------
     private void generarCasillasPregunta() {
         if (categoriaPreguntas == null || categoriaPreguntas.isEmpty()) {
             categoriaPreguntas = "default";
@@ -190,7 +185,7 @@ public class JuegoParquesGUI extends JFrame {
             Casilla c = casillas.get(index);
             if ("normal".equals(c.getTipo()) && !c.isPreguntaRespondida()) {
                 c.setTipo("pregunta");
-                c.setCategoria(categoriaPreguntas); // <-- se asigna la categoría
+                c.setCategoria(categoriaPreguntas);
                 generadas++;
             }
         }

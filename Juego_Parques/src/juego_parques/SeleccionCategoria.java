@@ -26,6 +26,7 @@ public class SeleccionCategoria extends JDialog {
         panelPrincipal.setLayout(new GridLayout(1, 4, 10, 0));
         panelPrincipal.setBackground(new Color(30, 30, 30));
 
+        // Crear las 4 categorías
         panelPrincipal.add(crearOpcion("Matemáticas básicas", Color.YELLOW));
         panelPrincipal.add(crearOpcion("Programación Java básica", Color.BLUE));
         panelPrincipal.add(crearOpcion("Inglés básico", Color.GREEN));
@@ -55,9 +56,11 @@ public class SeleccionCategoria extends JDialog {
             public void mouseClicked(MouseEvent e) {
                 if (categoriaSeleccionada == null) {
                     categoriaSeleccionada = categoria;
+
+                    // Mostrar niveles de dificultad
                     mostrarNiveles(panel, color);
 
-                    // Desactivar otros botones
+                    // Desactivar los otros botones
                     for (Component comp : panelPrincipal.getComponents()) {
                         if (comp != panel) comp.setEnabled(false);
                     }
@@ -91,12 +94,17 @@ public class SeleccionCategoria extends JDialog {
             btnNivel.setFocusPainted(false);
 
             btnNivel.addActionListener(ev -> {
+                // Generar preguntas entre 10 y 15
                 List<generarCasillasPregunta> preguntasGeneradas = generarPreguntas(categoriaSeleccionada, nivel);
-                // Aquí puedes enviar "preguntasGeneradas" al tablero para que se muestren como casillas
-                System.out.println("Preguntas generadas (" + preguntasGeneradas.size() + ") en " + categoriaSeleccionada + " - " + nivel + ":");
+
+                // Mostrar en consola todas las preguntas generadas
+                System.out.println("Preguntas generadas (" + preguntasGeneradas.size() + ") en " +
+                        categoriaSeleccionada + " - " + nivel + ":");
                 for (generarCasillasPregunta p : preguntasGeneradas) {
                     System.out.println("- " + p.getPregunta() + " (Respuesta: " + p.getRespuestaCorrecta() + ")");
                 }
+
+                // Aquí puedes enviar "preguntasGeneradas" al tablero para que se asignen a las casillas
                 dispose();
             });
 
@@ -109,12 +117,11 @@ public class SeleccionCategoria extends JDialog {
 
     private List<generarCasillasPregunta> generarPreguntas(String categoria, String dificultad) {
         Random rand = new Random();
-        int totalPreguntas = 10 + rand.nextInt(6); // genera entre 10 y 15 preguntas
+        int totalPreguntas = 10 + rand.nextInt(6); // 10 a 15 preguntas
         List<generarCasillasPregunta> listaPreguntas = new ArrayList<>();
 
         while (listaPreguntas.size() < totalPreguntas) {
             generarCasillasPregunta p = new generarCasillasPregunta(categoria, dificultad);
-            // Evitar repetir preguntas
             boolean repetida = listaPreguntas.stream()
                     .anyMatch(q -> q.getPregunta().equals(p.getPregunta()));
             if (!repetida) {

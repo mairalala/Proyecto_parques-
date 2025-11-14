@@ -19,7 +19,7 @@ public class JugadorGUI extends JPanel {
     private ReproductorSonido reproductor;
 
     private String categoriaSeleccionada;
-    private Set<String> preguntasUsadas = new HashSet<>(); // Para no repetir preguntas
+    private Set<String> preguntasUsadas = new HashSet<>();
 
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
                       ReproductorSonido reproductor, PanelInfoLateral panelInfo,
@@ -85,6 +85,7 @@ public class JugadorGUI extends JPanel {
         if (esPar && jugador.tieneFichasEnBase()) {
             elegirFichaParaSacar(jugador);
             panelTablero.actualizar();
+            siguienteTurno("Ficha sacada, siguiente turno");
             return;
         }
 
@@ -116,7 +117,6 @@ public class JugadorGUI extends JPanel {
 
         if ("pregunta".equals(casillaDestino.getTipo()) && !casillaDestino.isPreguntaRespondida()) {
 
-            // Elegir dificultad aleatoria
             String[] dificultades = {"Fácil", "Medio", "Avanzado"};
             String dificultad = dificultades[random.nextInt(dificultades.length)];
 
