@@ -19,7 +19,7 @@ public class JugadorGUI extends JPanel {
     private ReproductorSonido reproductor;
 
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
-                      ReproductorSonido reproductor, PanelInfoLateral panelInfo) {
+            ReproductorSonido reproductor, PanelInfoLateral panelInfo) {
         this.jugadores = jugadores;
         this.tablero = tablero;
         this.panelTablero = panelTablero;
@@ -38,7 +38,7 @@ public class JugadorGUI extends JPanel {
         botonPausa.addActionListener(e -> pausarJuego());
         add(botonPausa);
 
-        actualizarPanelInfo();
+        actualizarPanelInfo(); // se asegura de setear el color inicial
     }
 
     private void lanzarDados() {
@@ -195,12 +195,24 @@ public class JugadorGUI extends JPanel {
         Jugador jugador = jugadores[turnoActual];
         panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
                 jugador.getFichasEnMeta(), "Turno activo");
+
+        // Cambiar el color de la barra superior
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (parentFrame instanceof JuegoParquesGUI) {
+            ((JuegoParquesGUI) parentFrame).setColorBarra(jugador.getColor());
+        }
     }
 
     private void actualizarPanelInfo(String mensaje) {
         Jugador jugador = jugadores[turnoActual];
         panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
                 jugador.getFichasEnMeta(), mensaje);
+
+        // Cambiar el color de la barra superior
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (parentFrame instanceof JuegoParquesGUI) {
+            ((JuegoParquesGUI) parentFrame).setColorBarra(jugador.getColor());
+        }
     }
 
     private void pausarJuego() {

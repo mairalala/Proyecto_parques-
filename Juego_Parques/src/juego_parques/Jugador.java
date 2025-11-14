@@ -42,7 +42,7 @@ public class Jugador {
         if (color.equals(Color.RED)) {
             return "Rojo";
         }
-        if (color.equals(new Color(255, 220, 0))) {
+        if (color.equals(Color.YELLOW)) {
             return "Amarillo";
         }
         if (color.equals(Color.GREEN)) {

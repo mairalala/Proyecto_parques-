@@ -32,7 +32,7 @@ public class Ficha {
      */
     private String asignarColorStr(Color color) {
         if (color.equals(Color.RED)) return "Rojo";
-        if (color.equals(Color.YELLOW) || color.equals(new Color(255, 220, 0))) return "Amarillo";
+        if (color.equals(Color.YELLOW)) return "Amarillo";
         if (color.equals(Color.GREEN)) return "Verde";
         if (color.equals(Color.BLUE)) return "Azul";
         return "Desconocido";
