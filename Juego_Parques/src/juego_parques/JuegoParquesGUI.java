@@ -7,6 +7,7 @@ import com.formdev.flatlaf.FlatDarkLaf;
 
 public class JuegoParquesGUI extends JFrame {
 
+    private JPanel barraSuperior;
     private Tablero tablero;
     private TableroPanel panelTablero;
     private Jugador[] jugadores;
@@ -22,21 +23,20 @@ public class JuegoParquesGUI extends JFrame {
         this.reproductor = reproductor;
         this.modoOscuro = modoOscuro;
 
-        setTitle("🎲 Juego de Parqués");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(true);  // NECESARIO PARA BARRA PERSONALIZADA
         setLayout(new BorderLayout());
 
-        // Fondo
-        fondo = new FondoPanel("/juego_parques/imagenClaro.png", "/juego_parques/imagenOscuro.JPG", modoOscuro);
-        fondo.setLayout(new BorderLayout());
-        setContentPane(fondo);
+        crearBarraSuperior();  // ⬅ NUEVO
 
-        // Crear tablero
+        fondo = new FondoPanel("/juego_parques/imagenClaro.png",
+                "/juego_parques/imagenOscuro.JPG", modoOscuro);
+        fondo.setLayout(new BorderLayout());
+        add(fondo, BorderLayout.CENTER);
+
         tablero = new Tablero();
         tablero.setCantidadJugadores(cantidadJugadores);
 
-        // Definir jugadores según cantidad
+        // Colores EXACTOS garantizados
         Color[] coloresActivos;
         String[] nombresActivos;
 
@@ -50,66 +50,96 @@ public class JuegoParquesGUI extends JFrame {
                 nombresActivos = new String[]{"Rojo", "Verde", "Azul"};
                 break;
             default:
-                coloresActivos = new Color[]{Color.RED, new Color(0,180,0), new Color(255,220,0), Color.BLUE};
+                coloresActivos = new Color[]{
+                    Color.RED,
+                    Color.GREEN,
+                    Color.YELLOW,
+                    Color.BLUE
+                };
                 nombresActivos = new String[]{"Rojo", "Verde", "Amarillo", "Azul"};
         }
 
-        // Crear jugadores
         jugadores = new Jugador[cantidadJugadores];
         for (int i = 0; i < cantidadJugadores; i++) {
             jugadores[i] = new Jugador(nombresActivos[i], coloresActivos[i], tablero);
-            Point[] posicionesBase = tablero.getPosicionesBase(jugadores[i].getColorStr());
+            Point[] posBase = tablero.getPosicionesBase(jugadores[i].getColorStr());
             for (int f = 0; f < jugadores[i].getFichas().size(); f++) {
                 Ficha ficha = jugadores[i].getFichas().get(f);
                 ficha.volverABase();
-                if (posicionesBase != null && posicionesBase.length > f) {
-                    ficha.setPosicion(posicionesBase[f]);
+                if (posBase != null && posBase.length > f) {
+                    ficha.setPosicion(posBase[f]);
                 }
             }
         }
 
-        // Panel tablero
         panelTablero = new TableroPanel(tablero, jugadores, modoOscuro);
         fondo.add(panelTablero, BorderLayout.CENTER);
 
-        // Panel lateral
         panelInfo = new PanelInfoLateral(modoOscuro);
         fondo.add(panelInfo, BorderLayout.EAST);
 
-        // Controlador de turnos
-        controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero, reproductor, panelInfo);
+        controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero,
+                reproductor, panelInfo);
         fondo.add(controladorTurnos, BorderLayout.SOUTH);
 
-        // Panel de pausa
         panelPausa = new PanelPausa(this);
         panelPausa.setVisible(false);
         getLayeredPane().add(panelPausa, JLayeredPane.POPUP_LAYER);
 
-        // Música de fondo
-        if (!reproductor.estaReproduciendoFondo()) {
-            reproductor.reproducirMusicaFondo("fondo.wav");
-        }
-
-        pack();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);   // ventana maximizada completa
+        setUndecorated(true);                      // barra personalizada
+        setVisible(true);
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    // Cambiar tema claro/oscuro
-    public void cambiarTema(boolean oscuro) {
-        try {
-            if (oscuro) FlatDarkLaf.setup();
-            else FlatLightLaf.setup();
+    // ---------------------------
+    // BARRA SUPERIOR PERSONALIZADA
+    // ---------------------------
+    private void crearBarraSuperior() {
+        barraSuperior = new JPanel();
+        barraSuperior.setPreferredSize(new Dimension(1, 35));
+        barraSuperior.setLayout(new BorderLayout());
+        barraSuperior.setBackground(new Color(180, 0, 0));
 
-            SwingUtilities.updateComponentTreeUI(this);
-            this.modoOscuro = oscuro;
+        // Botones
+        JPanel botones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        botones.setOpaque(false);
 
-            fondo.setModoOscuro(oscuro);
-            panelTablero.setModoOscuro(oscuro);
-            panelInfo.setModoOscuro(oscuro);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JButton btnMin = new JButton("—");
+        btnMin.addActionListener(e -> setState(JFrame.ICONIFIED));
+
+        JButton btnClose = new JButton("X");
+        btnClose.addActionListener(e -> dispose());
+
+        estiloBoton(btnMin);
+        estiloBoton(btnClose);
+
+        botones.add(btnMin);
+        botones.add(btnClose);
+        barraSuperior.add(botones, BorderLayout.EAST);
+
+        add(barraSuperior, BorderLayout.NORTH);
+    }
+
+    private void estiloBoton(JButton btn) {
+        btn.setFocusable(false);
+        btn.setPreferredSize(new Dimension(45, 28));
+        btn.setFont(new Font("Arial", Font.BOLD, 16));
+    }
+
+    // ---------------------------
+    // MÉTODO QUE CAMBIA COLOR DE BARRA
+    // ---------------------------
+    public void setColorBarra(Color c) {
+        barraSuperior.setBackground(c);
+        barraSuperior.repaint();
+    }
+
+    // ---------------------------
+    public void mostrarPanelPausa() {
+        panelPausa.setBounds(0, 0, getWidth(), getHeight());
+        panelPausa.setVisible(true);
     }
 
     public void mostrarPanelConfiguracion() {
@@ -119,21 +149,8 @@ public class JuegoParquesGUI extends JFrame {
         panelConfiguracion.setVisible(true);
     }
 
-    public void mostrarPanelPausa() {
-        if (panelPausa != null) {
-            panelPausa.setBounds(0, 0, getContentPane().getWidth(), getContentPane().getHeight());
-            panelPausa.setOpaque(true);
-            panelPausa.centrarEnParent(this);
-            panelPausa.setVisible(true);
-            panelPausa.revalidate();
-            panelPausa.repaint();
-        }
-    }
-
     public void ocultarPanelPausa() {
-        if (panelPausa != null) {
-            panelPausa.setVisible(false);
-        }
+        panelPausa.setVisible(false);
     }
 
     public ReproductorSonido getReproductor() {

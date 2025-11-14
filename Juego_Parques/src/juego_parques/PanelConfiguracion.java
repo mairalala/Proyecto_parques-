@@ -27,13 +27,14 @@ public class PanelConfiguracion extends JDialog {
                 g.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
             }
         };
+
         panelFondo.setLayout(new GridLayout(4, 1, 10, 10));
         panelFondo.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(panelFondo, BorderLayout.CENTER);
 
         chkModoOscuro = new JCheckBox("Modo oscuro", modoOscuroActual);
+        chkModoOscuro.setOpaque(false);
         chkModoOscuro.setForeground(modoOscuroActual ? Color.WHITE : Color.BLACK);
-        chkModoOscuro.setBackground(new Color(0,0,0,0));
         chkModoOscuro.addActionListener(e -> {
             parent.cambiarTema(chkModoOscuro.isSelected());
             actualizarModoOscuro(chkModoOscuro.isSelected());

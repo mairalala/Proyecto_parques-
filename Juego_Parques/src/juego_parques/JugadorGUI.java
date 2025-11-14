@@ -17,10 +17,10 @@ public class JugadorGUI extends JPanel {
     private int intentosIniciales = 0;
     private Ficha fichaSeleccionada;
     private ReproductorSonido reproductor;
-    private JuegoParquesGUI parent;
 
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
-            ReproductorSonido reproductor, PanelInfoLateral panelInfo) {
+                      ReproductorSonido reproductor, PanelInfoLateral panelInfo) {
+
         this.jugadores = jugadores;
         this.tablero = tablero;
         this.panelTablero = panelTablero;
@@ -98,7 +98,7 @@ public class JugadorGUI extends JPanel {
                 panelTablero.setFichaActiva(fichaSeleccionada);
                 fichaSeleccionada.mover(total, tablero);
                 panelInfo.actualizarInfo(jugador.getNombre(), dado1, dado2, intentosIniciales,
-                        jugador.getFichasEnMeta(), "Ficha " + fichaSeleccionada.getNumero() + " avanzó " + total + " casillas");
+                        jugador.getFichasEnMeta(), "Ficha avanzó " + total + " casillas");
             }
             panelTablero.actualizar();
         }
@@ -117,8 +117,7 @@ public class JugadorGUI extends JPanel {
                 .toArray();
 
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        new MensajeEmergente((JFrame) SwingUtilities.getWindowAncestor(this), "¡Sacaste ficha!");
-
+        new MensajeEmergente(parentFrame, "¡Sacaste ficha!");
 
         Object seleccion = JOptionPane.showInputDialog(
                 parentFrame,
@@ -194,20 +193,30 @@ public class JugadorGUI extends JPanel {
         Jugador jugador = jugadores[turnoActual];
         panelInfo.actualizarInfo(jugador.getNombre(), 0, 0, intentosIniciales,
                 jugador.getFichasEnMeta(), "Turno activo");
+
+        aplicarColorVentana(jugador.getColor());
     }
 
     private void actualizarPanelInfo(String mensaje) {
         Jugador jugador = jugadores[turnoActual];
         panelInfo.actualizarInfo(jugador.getNombre(), 0, 0, intentosIniciales,
                 jugador.getFichasEnMeta(), mensaje);
+
+        aplicarColorVentana(jugador.getColor());
     }
 
-    // 🔹 Nuevo método para mostrar el panel de pausa
+    private void aplicarColorVentana(Color color) {
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame instanceof JuegoParquesGUI) {
+            ((JuegoParquesGUI) frame).setColorBarra(color);
+        }
+    }
+
     private void pausarJuego() {
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (parentFrame instanceof JuegoParquesGUI) {
-            JuegoParquesGUI gui = (JuegoParquesGUI) parentFrame;
-            gui.mostrarPanelPausa();
+            ((JuegoParquesGUI) parentFrame).mostrarPanelPausa();
         }
     }
+    
 }
