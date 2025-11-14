@@ -156,4 +156,8 @@ public class JuegoParquesGUI extends JFrame {
     public ReproductorSonido getReproductor() {
         return reproductor;
     }
+
+    void cambiarTema(boolean selected) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
