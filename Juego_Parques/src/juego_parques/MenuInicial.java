@@ -48,7 +48,7 @@ public class MenuInicial extends JFrame {
 
         JLabel titulo = new JLabel("🎲 PARQUÉS GUI 🎲", SwingConstants.CENTER);
         titulo.setFont(new Font("Segoe UI Emoji", Font.BOLD, 70));
-        titulo.setForeground(Color.WHITE);
+        titulo.setForeground(Color.BLACK);
 
         panelTitulo.add(titulo, BorderLayout.CENTER);
         panelCentral.add(panelTitulo);

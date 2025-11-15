@@ -33,7 +33,7 @@ public class FondoPanel extends JPanel {
          * Se busca dentro del mismo paquete del proyecto usando getResource().
          */
         try {
-            imagenClaro = new ImageIcon(getClass().getResource("/juego_parques/imagenClaro.png")).getImage();
+            imagenClaro = new ImageIcon(getClass().getResource("/juego_parques/fondo parqués.png")).getImage();
         } catch (Exception e) {
             System.out.println("❌ No se pudo cargar imagen clara: " + rutaClaro);
         }
@@ -43,7 +43,7 @@ public class FondoPanel extends JPanel {
          * Se usa la ruta del archivo JPG dentro del paquete.
          */
         try {
-            imagenOscuro = new ImageIcon(getClass().getResource("/juego_parques/imagenOscuro.jpg")).getImage();
+            imagenOscuro = new ImageIcon(getClass().getResource("/juego_parques/fondo menu.jpeg")).getImage();
         } catch (Exception e) {
             System.out.println("❌ No se pudo cargar imagen oscura: " + rutaOscuro);
         }

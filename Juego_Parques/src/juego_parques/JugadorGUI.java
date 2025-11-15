@@ -47,6 +47,8 @@ public class JugadorGUI extends JPanel {
     }
 
     private void lanzarDados() {
+       reproductor.reproducirSonidoDados();
+
         Jugador jugador = jugadores[turnoActual];
 
         Dado dado = new Dado();
