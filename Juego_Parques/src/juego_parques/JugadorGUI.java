@@ -10,7 +10,10 @@ public class JugadorGUI extends JPanel {
     private Jugador[] jugadores;
     private Tablero tablero;
     private TableroPanel panelTablero;
+
+    // Eliminado: PanelInfoLateral
     private PanelInfoLateral panelInfo;
+
     private int turnoActual = 0;
     private Random random = new Random();
     private int paresConsecutivos = 0;
@@ -20,17 +23,20 @@ public class JugadorGUI extends JPanel {
 
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
                       ReproductorSonido reproductor, PanelInfoLateral panelInfo) {
+
         this.jugadores = jugadores;
         this.tablero = tablero;
         this.panelTablero = panelTablero;
         this.reproductor = reproductor;
+
+        // Guardamos panelInfo PERO puede ser null
         this.panelInfo = panelInfo;
 
         setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
 
         JButton botonLanzar = new JButton("🎲 Lanzar Dados");
         botonLanzar.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
-        botonLanzar.addActionListener(e -> lanzarDados());
+        botonLanzar.addActionListener(e -> lanzarDatosSeguros());
         add(botonLanzar);
 
         JButton botonPausa = new JButton("⏸ Pausa");
@@ -38,7 +44,16 @@ public class JugadorGUI extends JPanel {
         botonPausa.addActionListener(e -> pausarJuego());
         add(botonPausa);
 
-        actualizarPanelInfo();
+        actualizarPanelInfo("Turno activo");
+    }
+
+    /** ENVUELVE lanzarDados para evitar errores por panelInfo == null */
+    private void lanzarDatosSeguros() {
+        try {
+            lanzarDados();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void lanzarDados() {
@@ -55,8 +70,7 @@ public class JugadorGUI extends JPanel {
         boolean esPar = (dado1 == dado2);
         int total = dado1 + dado2;
 
-        panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-                jugador.getFichasEnMeta(), "Turno activo");
+        actualizarPanelInfo("Turno activo");
 
         if (esPar) {
             paresConsecutivos++;
@@ -71,8 +85,7 @@ public class JugadorGUI extends JPanel {
                 siguienteTurno("No sacó par en 3 intentos. Pierde el turno.");
                 return;
             } else {
-                panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-                        jugador.getFichasEnMeta(), "Intenta nuevamente (" + intentosIniciales + "/3)");
+                actualizarPanelInfo("Intento " + intentosIniciales + " de 3");
                 return;
             }
         }
@@ -99,9 +112,7 @@ public class JugadorGUI extends JPanel {
                 fichaSeleccionada = activas.get(0);
                 panelTablero.setFichaActiva(fichaSeleccionada);
                 fichaSeleccionada.mover(total, tablero);
-
-                panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-                        jugador.getFichasEnMeta(), "Ficha avanzó " + total + " casillas");
+                actualizarPanelInfo("Ficha avanzó " + total + " casillas");
             }
             panelTablero.actualizar();
         }
@@ -109,8 +120,7 @@ public class JugadorGUI extends JPanel {
         if (!esPar) {
             siguienteTurno("Turno terminado");
         } else {
-            panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-                    jugador.getFichasEnMeta(), "Sacó par! Puede volver a lanzar.");
+            actualizarPanelInfo("Sacó par! Puede volver a lanzar.");
         }
     }
 
@@ -142,8 +152,7 @@ public class JugadorGUI extends JPanel {
             panelTablero.setFichaActiva(fichaSeleccionada);
             panelTablero.actualizar();
 
-            panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-                    jugador.getFichasEnMeta(), "Ficha " + num + " salió de la base");
+            actualizarPanelInfo("Ficha " + num + " salió de la base");
         }
     }
 
@@ -173,15 +182,13 @@ public class JugadorGUI extends JPanel {
             panelTablero.setFichaActiva(fichaSeleccionada);
             panelTablero.actualizar();
 
-            panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-                    jugador.getFichasEnMeta(), "Ficha " + num + " avanzó " + pasos + " casillas");
+            actualizarPanelInfo("Ficha " + num + " avanzó " + pasos + " casillas");
         }
     }
 
     private void siguienteTurno(String mensaje) {
         paresConsecutivos = 0;
         intentosIniciales = 0;
-
         turnoActual = (turnoActual + 1) % jugadores.length;
 
         fichaSeleccionada = null;
@@ -191,16 +198,15 @@ public class JugadorGUI extends JPanel {
         actualizarPanelInfo(mensaje);
     }
 
-    private void actualizarPanelInfo() {
-        Jugador jugador = jugadores[turnoActual];
-        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-                jugador.getFichasEnMeta(), "Turno activo");
-    }
-
+    /** Ahora es seguro aunque panelInfo sea null */
     private void actualizarPanelInfo(String mensaje) {
-        Jugador jugador = jugadores[turnoActual];
-        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-                jugador.getFichasEnMeta(), mensaje);
+        if (panelInfo != null) {
+            Jugador jugador = jugadores[turnoActual];
+            panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
+                    jugador.getFichasEnMeta(), mensaje);
+        } else {
+            System.out.println("[INFO] " + mensaje);
+        }
     }
 
     private void pausarJuego() {

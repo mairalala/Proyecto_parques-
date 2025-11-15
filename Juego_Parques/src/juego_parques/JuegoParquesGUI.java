@@ -18,16 +18,16 @@ public class JuegoParquesGUI extends JFrame {
     private Jugador[] jugadores;
     private JugadorGUI controladorTurnos;
     private ReproductorSonido reproductor;
-    private PanelInfoLateral panelInfo;
+
+    // ELIMINADO: PanelInfoLateral panelInfo;
     private PanelConfiguracion panelConfiguracion;
     private PanelPausa panelPausa;
     private boolean modoOscuro;
     private FondoPanel fondo;
 
     // ---------------- CONSTRUCTORES ----------------
-
     public JuegoParquesGUI(int cantidadJugadores, ReproductorSonido reproductor, boolean modoOscuro,
-                           String[] nombresJugadores, String[] coloresJugadores) {
+            String[] nombresJugadores, String[] coloresJugadores) {
         this.reproductor = reproductor;
         this.modoOscuro = modoOscuro;
 
@@ -37,7 +37,7 @@ public class JuegoParquesGUI extends JFrame {
     }
 
     public JuegoParquesGUI(int cantidadJugadores, String[] nombresJugadores, Color[] coloresJugadores,
-                           ReproductorSonido reproductor, boolean modoOscuro) {
+            ReproductorSonido reproductor, boolean modoOscuro) {
         this.reproductor = reproductor;
         this.modoOscuro = modoOscuro;
 
@@ -54,8 +54,8 @@ public class JuegoParquesGUI extends JFrame {
 
         // Fondo según modo
         fondo = new FondoPanel("/juego_parques/imagenClaro.png",
-                               "/juego_parques/imagenOscuro.JPG",
-                               modoOscuro);
+                "/juego_parques/imagenOscuro.JPG",
+                modoOscuro);
         fondo.setLayout(new BorderLayout());
         add(fondo, BorderLayout.CENTER);
 
@@ -102,26 +102,33 @@ public class JuegoParquesGUI extends JFrame {
 
     private Color obtenerColor(String c) {
         switch (c.toUpperCase()) {
-            case "ROJO": return Color.RED;
-            case "VERDE": return Color.GREEN;
-            case "AZUL": return Color.BLUE;
-            case "AMARILLO": return Color.YELLOW;
+            case "ROJO":
+                return Color.RED;
+            case "VERDE":
+                return Color.GREEN;
+            case "AZUL":
+                return Color.BLUE;
+            case "AMARILLO":
+                return Color.YELLOW;
         }
         return Color.WHITE;
     }
 
     private void terminarInicializacion() {
+        // Panel principal del tablero
         panelTablero = new TableroPanel(tablero, jugadores, modoOscuro);
+        panelTablero.setMargenIzquierdo(-150);
         fondo.add(panelTablero, BorderLayout.CENTER);
 
-        panelInfo = new PanelInfoLateral(modoOscuro);
-        fondo.add(panelInfo, BorderLayout.EAST);
-
+        // ELIMINADO: Panel lateral derecho
+        // panelInfo = new PanelInfoLateral(modoOscuro);
+        // fondo.add(panelInfo, BorderLayout.EAST);
+        // Controlador de turnos – ENVÍA NULL ya que panelInfo fue eliminado
         controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero,
-                                          reproductor, panelInfo);
+                reproductor, null);
         fondo.add(controladorTurnos, BorderLayout.SOUTH);
 
-        // Panel de pausa overlay
+        // Panel de pausa
         panelPausa = new PanelPausa(this);
         panelPausa.setVisible(false);
         getLayeredPane().add(panelPausa, JLayeredPane.POPUP_LAYER);
