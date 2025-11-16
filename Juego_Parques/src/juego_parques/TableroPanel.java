@@ -187,9 +187,7 @@ public class TableroPanel extends JPanel {
         //break;
 
     }
-}
-
-private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
+    private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
         Color baseColor;
         switch (color) {
             case "Rojo": baseColor = new Color(255, 0, 0, 100); break;
@@ -249,3 +247,6 @@ private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, Stri
         repaint();
     }
 }
+
+
+

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class generarCasillasPregunta {
 
-     private String pregunta;
+    private String pregunta;
     private String respuestaCorrecta;
     private String categoria;
     private String dificultad;

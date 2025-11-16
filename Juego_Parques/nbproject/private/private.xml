@@ -3,11 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/FondoPanel.java</file>
             <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/generarCasillasPregunta.java</file>
             <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/JugadorGUI.java</file>
+            <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/imagenClaro.png</file>
             <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/SeleccionCategoria.java</file>
+            <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/JuegoParquesGUI.java</file>
             <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/MenuInicial.java</file>
             <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/Ficha.java</file>
+            <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/TableroPanel.java</file>
+            <file>file:/D:/GitHub/Proyecto_parques-/Juego_Parques/src/juego_parques/ReproductorSonido.java</file>
         </group>
     </open-files>
 </project-private>
