@@ -8,11 +8,17 @@ public class TableroPanel extends JPanel {
 
     private Jugador[] jugadores;
     private Tablero tablero;
-    private int tamCasilla = 40;
+    private int tamCasilla = 50;
     private boolean modoOscuro;
     private Ficha fichaActiva = null;
     private int dado1 = 1;
     private int dado2 = 1;
+    private int margenIzquierdo = 0;
+
+    public void setMargenIzquierdo(int margen) {
+        this.margenIzquierdo = margen;
+        repaint();
+    }
 
     public TableroPanel(Tablero tablero, Jugador[] jugadores, boolean modoOscuro) {
         this.tablero = tablero;
@@ -41,13 +47,12 @@ public class TableroPanel extends JPanel {
         this.fichaActiva = ficha;
     }
 
-    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
         int tableroSize = 20 * tamCasilla;
-        int offsetX = (getWidth() - tableroSize) / 2;
+        int offsetX = Math.abs(margenIzquierdo);
         int offsetY = (getHeight() - tableroSize) / 2;
 
         // Dibujar casillas
@@ -90,7 +95,9 @@ public class TableroPanel extends JPanel {
         int fichaSize = tamCasilla - 10;
         for (Jugador jugador : jugadores) {
             for (Ficha ficha : jugador.getFichas()) {
-                if (ficha.isEnBase()) continue;
+                if (ficha.isEnBase()) {
+                    continue;
+                }
 
                 Point pos = ficha.getPosicion();
                 int fx = offsetX + pos.x * tamCasilla + 5;
@@ -134,7 +141,10 @@ public class TableroPanel extends JPanel {
         int cy = y + size / 2;
 
         switch (valor) {
-            case 1: g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot); break;
+
+            case 1:
+                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+                break;
             case 2:
                 g2d.fillOval(x + 10, y + 10, dot, dot);
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
@@ -144,31 +154,42 @@ public class TableroPanel extends JPanel {
                 g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
                 break;
+
             case 4:
+
                 g2d.fillOval(x + 10, y + 10, dot, dot);
                 g2d.fillOval(x + size - 20, y + 10, dot, dot);
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
-                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+
                 break;
+
             case 5:
+
                 g2d.fillOval(x + 10, y + 10, dot, dot);
                 g2d.fillOval(x + size - 20, y + 10, dot, dot);
                 g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
-                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
+
                 break;
+
             case 6:
+
                 g2d.fillOval(x + 10, y + 10, dot, dot);
                 g2d.fillOval(x + 10, y + size / 2 - dot / 2, dot, dot);
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
                 g2d.fillOval(x + size - 20, y + 10, dot, dot);
                 g2d.fillOval(x + size - 20, y + size / 2 - dot / 2, dot, dot);
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
-                break;
-        }
-    }
 
-    private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
+                break;
+
+        }
+        //break;
+
+    }
+}
+
+private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
         Color baseColor;
         switch (color) {
             case "Rojo": baseColor = new Color(255, 0, 0, 100); break;
