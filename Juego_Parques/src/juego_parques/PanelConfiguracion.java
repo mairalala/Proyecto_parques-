@@ -3,6 +3,7 @@ package juego_parques;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener; // Importación necesaria para ChangeListener
 
 /**
  * Panel de Configuración del juego.
@@ -11,69 +12,78 @@ import javax.swing.event.ChangeEvent;
  */
 public class PanelConfiguracion extends JDialog {
 
-    // Checkbox para activar/desactivar modo oscuro
     private JCheckBox chkModoOscuro;
-
-    // Slider para controlar el volumen
     private JSlider sliderVolumen;
-
-    // Botón para cerrar la ventana
     private JButton btnCerrar;
-
-    // Estado actual del modo oscuro
     private boolean modoOscuro;
+    private JPanel panelFondo; // ✅ Hacemos panelFondo accesible
+
+    // Definición de colores para modos
+    private final Color COLOR_FONDO_OSCURO_TRANSLUCIDO = new Color(0, 0, 0, 180);
+    private final Color COLOR_FONDO_CLARO_TRANSLUCIDO = new Color(255, 255, 255, 180);
+    private final Color COLOR_TEXTO_OSCURO = Color.WHITE;
+    private final Color COLOR_TEXTO_CLARO = Color.BLACK;
+    
+    // Referencia al JLabel de volumen
+    private JLabel lblVolumen; // ✅ Nueva referencia
 
     /**
      * Constructor del panel de configuración.
-     * @param parent referencia a la ventana principal
-     * @param reproductor controlador de sonido
-     * @param modoOscuroActual si el juego está actualmente en modo oscuro
      */
     public PanelConfiguracion(JuegoParquesGUI parent, ReproductorSonido reproductor, boolean modoOscuroActual) {
-        super(parent, " Configuración", true); // JDialog modal (bloquea la ventana del juego)
+        super(parent, " Configuración", true);
 
         this.modoOscuro = modoOscuroActual;
 
-        setUndecorated(true); // Sin bordes, para diseño personalizado
-        setBackground(new Color(0,0,0,0)); // Fondo transparente total del diálogo
+        setUndecorated(true);
+        setBackground(new Color(0,0,0,0));
         setLayout(new BorderLayout());
 
-        // Panel de fondo con un rectángulo translúcido redondeado
-        JPanel panelFondo = new JPanel() {
+        // ✅ PANEL DE FONDO: Usa un fondo translúcido que depende del modo
+        panelFondo = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
 
-                // Fondo negro translúcido
-                g.setColor(new Color(0, 0, 0, 180));
+                Color fondoConfig = modoOscuro ? 
+                    COLOR_FONDO_OSCURO_TRANSLUCIDO : 
+                    COLOR_FONDO_CLARO_TRANSLUCIDO;
+
+                g.setColor(fondoConfig);
                 g.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
             }
         };
 
-        panelFondo.setLayout(new GridLayout(4, 1, 10, 10)); // 4 secciones verticales
+        panelFondo.setLayout(new GridLayout(4, 1, 10, 10));
         panelFondo.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panelFondo.setOpaque(false); // Necesario para que paintComponent se ejecute
         add(panelFondo, BorderLayout.CENTER);
 
         // -------------------------------
         // CHECKBOX DE MODO OSCURO
         // -------------------------------
         chkModoOscuro = new JCheckBox("Modo oscuro", modoOscuroActual);
-        chkModoOscuro.setOpaque(false); // Fondo transparente
-        chkModoOscuro.setForeground(modoOscuroActual ? Color.WHITE : Color.BLACK);
+        chkModoOscuro.setOpaque(false);
+        
+        // El color de texto inicial se configura en actualizarModoOscuro
+        actualizarModoOscuro(modoOscuroActual);
 
         // Acción al activar o desactivar el modo oscuro
         chkModoOscuro.addActionListener(e -> {
-            parent.cambiarTema(chkModoOscuro.isSelected()); // Cambia el tema en la ventana principal
-            actualizarModoOscuro(chkModoOscuro.isSelected()); // Actualiza estilo interno del panel
+            parent.cambiarTema(chkModoOscuro.isSelected());
+            actualizarModoOscuro(chkModoOscuro.isSelected());
         });
 
         // -------------------------------
         // SLIDER DE VOLUMEN
         // -------------------------------
-        sliderVolumen = new JSlider(0, 100, 70); // Volumen inicial al 70%
-        sliderVolumen.setMajorTickSpacing(25); // Marca cada 25 unidades
-        sliderVolumen.setPaintTicks(true);     // Mostrar divisiones
-        sliderVolumen.setPaintLabels(true);    // Mostrar números (0, 25, 50, 75, 100)
+        lblVolumen = new JLabel("Volumen de música:", SwingConstants.CENTER); // ✅ Inicialización
+
+        sliderVolumen = new JSlider(0, 100, 70);
+        sliderVolumen.setMajorTickSpacing(25);
+        sliderVolumen.setPaintTicks(true);
+        sliderVolumen.setPaintLabels(true);
+        sliderVolumen.setOpaque(false); // ✅ Fondo transparente
 
         // Cuando se cambia el valor del slider, actualiza volumen de música
         sliderVolumen.addChangeListener((ChangeEvent e) ->
@@ -83,17 +93,16 @@ public class PanelConfiguracion extends JDialog {
         // BOTÓN CERRAR
         // -------------------------------
         btnCerrar = new JButton("Cerrar");
-        btnCerrar.addActionListener(e -> dispose()); // Cierra el panel de configuración
+        btnCerrar.addActionListener(e -> dispose());
 
         // Agregar componentes al panel visual
         panelFondo.add(chkModoOscuro);
-        panelFondo.add(new JLabel("Volumen de música:", SwingConstants.CENTER));
+        panelFondo.add(lblVolumen); // ✅ Añadir el JLabel
         panelFondo.add(sliderVolumen);
         panelFondo.add(btnCerrar);
 
-        // Tamaño y posición del diálogo
         setSize(350, 250);
-        setLocationRelativeTo(parent); // Centrado respecto al juego
+        setLocationRelativeTo(parent);
     }
 
     /**
@@ -101,7 +110,19 @@ public class PanelConfiguracion extends JDialog {
      */
     private void actualizarModoOscuro(boolean modo) {
         this.modoOscuro = modo;
-        chkModoOscuro.setForeground(modo ? Color.WHITE : Color.BLACK);
-        repaint(); // Redibuja el panel con los nuevos colores
+        
+        Color colorTexto = modo ? COLOR_TEXTO_OSCURO : COLOR_TEXTO_CLARO;
+        
+        // ✅ Actualiza el color del texto de los componentes
+        chkModoOscuro.setForeground(colorTexto);
+        lblVolumen.setForeground(colorTexto);
+        sliderVolumen.setForeground(colorTexto); // Texto de las etiquetas del slider
+        
+        // Ajustar color del botón (opcionalmente)
+        btnCerrar.setBackground(modo ? new Color(70, 70, 70) : new Color(200, 200, 200));
+        btnCerrar.setForeground(modo ? Color.WHITE : Color.BLACK);
+
+        panelFondo.repaint(); // Redibuja el fondo translúcido
+        repaint(); // Redibuja el diálogo
     }
 }

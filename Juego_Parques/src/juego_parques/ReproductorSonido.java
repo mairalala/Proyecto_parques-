@@ -52,7 +52,7 @@ public class ReproductorSonido {
 
         try {
             // Cargar archivo desde la carpeta de recursos
-            InputStream is = getClass().getResourceAsStream("/juego_parques/" + archivo);
+            InputStream is = getClass().getResourceAsStream("/juego_parques/Inspiring-Ascent-_0be33efa125b4940864f156cafbaa28c_.wav");
 
             if (is == null) {
                 System.out.println("❌ No se encontró música: " + archivo);
