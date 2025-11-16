@@ -128,7 +128,7 @@ public class MenuInicial extends JFrame {
             if (cantJugadores < 2) {
                 return;
             }
-            PanelSeleccionJugadores panelJugadores = new PanelSeleccionJugadores(this, cantJugadores);
+            PanelSeleccionJugadores panelJugadores = new PanelSeleccionJugadores(this, cantJugadores, modoOscuro);
             if (!panelJugadores.fueConfirmado()) {
                 return;
             }
