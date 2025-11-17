@@ -252,4 +252,5 @@ public class JugadorGUI extends JPanel {
     public String getCategoriaSeleccionada() {
         return categoriaSeleccionada;
     }
+    //holi
 }
